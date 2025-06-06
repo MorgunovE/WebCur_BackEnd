@@ -40,5 +40,6 @@ class UtilisateurRessource(Resource):
         # Supprimer un utilisateur
         deleted = self.service.delete(id)
         if deleted:
-            return '', 204
-        return {"message": "Utilisateur non trouvé"}, 404
+            return 'Utilisateur supprimé', 204
+        else:
+            return {"message": "Utilisateur non trouvé"}, 404
