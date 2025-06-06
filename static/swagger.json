@@ -221,7 +221,7 @@
         "type": "http",
         "scheme": "bearer",
         "bearerFormat": "JWT",
-        "description": "JWT Authorization avec le préfixe 'Bearer ' Example: \"Authorization: Bearer {token}\""
+        "description": "JWT Authorization avec le préfixe 'Bearer ' Example: \"Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...\""
       }
     },
     "schemas": {
