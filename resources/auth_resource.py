@@ -21,3 +21,12 @@ class AuthentificationRessource(Resource):
             access_token = create_access_token(identity=utilisateur["id"])
             return {"access_token": access_token}, 200
         return {"message": "Identifiants invalides"}, 401
+
+    # Ressource pour la déconnexion (JWT)
+    class DeconnexionRessource(Resource):
+        def post(self):
+            # Implementation de la déconnexion doit faire partie de la gestion du token JWT dnas Frontend party
+            # En général, la déconnexion est gérée côté client en supprimant le token
+            # Ici, nous pouvons juste retourner un message de succès comme exemple
+            # Frontend peut supprimer le token JWT du stockage local ou des cookies
+            return {"message": "Déconnexion réussie"}, 200
