@@ -7,6 +7,8 @@ from flask_swagger_ui import get_swaggerui_blueprint
 from dotenv import load_dotenv
 from resources.user_resource import UtilisateurListRessource, UtilisateurRessource
 from resources.auth_resource import AuthentificationRessource
+from resources.auth_resource import DeconnexionRessource
+
 import os
 
 # Charger les variables d'environnement
@@ -32,6 +34,7 @@ api.add_resource(UtilisateurRessource, '/utilisateurs/<string:id>')
 
 # Enregistrer la ressource d'authentification
 api.add_resource(AuthentificationRessource, '/connexion')
+api.add_resource(DeconnexionRessource, '/deconnexion')
 
 # Configurer Swagger UI
 SWAGGER_URL = app.config['SWAGGER_URL']
