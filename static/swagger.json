@@ -6,6 +6,74 @@
     "description": "API de base pour la gestion DB dans projet WebCur."
   },
   "paths": {
+     "/connexion": {
+      "post": {
+        "summary": "Connexion utilisateur",
+        "description": "Authentifie un utilisateur et retourne un token JWT.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "example": "user@mail.com"
+                  },
+                  "mot_de_passe": {
+                    "type": "string",
+                    "example": "yourpassword"
+                  }
+                },
+                "required": ["email", "mot_de_passe"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Connexion réussie",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "access_token": {
+                      "type": "string",
+                      "description": "JWT access token"
+                    }
+                  }
+                },
+                "examples": {
+                  "success": {
+                    "value": {
+                      "access_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Identifiants invalides",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Identifiants invalides"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/utilisateurs": {
       "get": {
         "summary": "Liste des utilisateurs",
