@@ -74,6 +74,27 @@
         }
       }
     },
+    "/deconnexion": {
+      "post": {
+        "summary": "Déconnexion utilisateur",
+        "description": "Déconnecte l'utilisateur (côté client, supprimer le token JWT).",
+        "responses": {
+          "200": {
+            "description": "Déconnexion réussie",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": { "type": "string", "example": "Déconnexion réussie" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/utilisateurs": {
       "get": {
         "summary": "Liste des utilisateurs",
