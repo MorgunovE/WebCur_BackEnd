@@ -5,6 +5,7 @@ from flask_jwt_extended import JWTManager
 from flask_cors import CORS
 from flask_swagger_ui import get_swaggerui_blueprint
 from dotenv import load_dotenv
+from resources.user_resource import UtilisateurListRessource, UtilisateurRessource
 import os
 
 # Charger les variables d'environnement
@@ -24,6 +25,10 @@ api = Api(app)
 jwt = JWTManager(app)
 CORS(app)
 
+# Enregistrer les ressources utilisateur
+api.add_resource(UtilisateurListRessource, '/utilisateurs')
+api.add_resource(UtilisateurRessource, '/utilisateurs/<string:id>')
+
 # Configurer Swagger UI
 SWAGGER_URL = app.config['SWAGGER_URL']
 API_URL = app.config['API_URL']
@@ -41,7 +46,7 @@ def health():
 
 @app.route('/')
 def hello_world():
-    return 'Hello World!'
+    return 'WebCur backend démarré avec succès! Allez sur /swagger pour la documentation API.'
 
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=True)
