@@ -1,0 +1,124 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "WebCur API",
+    "version": "1.0.0",
+    "description": "API de base pour la gestion DB dans projet WebCur."
+  },
+  "paths": {
+    "/utilisateurs": {
+      "get": {
+        "summary": "Liste des utilisateurs",
+        "description": "Récupère la liste de tous les utilisateurs.",
+        "responses": {
+          "200": {
+            "description": "Succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Utilisateur" }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Créer un utilisateur",
+        "description": "Crée un nouvel utilisateur.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/Utilisateur" }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Utilisateur créé" }
+        }
+      }
+    },
+    "/utilisateurs/{id}": {
+        "get": {
+            "summary": "Récupérer un utilisateur",
+            "description": "Récupère les informations d'un utilisateur par son ID.",
+            "parameters": [
+            {
+                "name": "id",
+                "in": "path",
+                "required": true,
+                "description": "ID de l'utilisateur",
+                "schema": { "type": "string" }
+            }
+            ],
+            "responses": {
+            "200": {
+                "description": "Utilisateur trouvé",
+                "content": {
+                "application/json": {
+                    "schema": { "$ref": "#/components/schemas/Utilisateur" }
+                }
+                }
+            },
+            "404": { "description": "Utilisateur non trouvé" }
+            }
+        },
+      "put": {
+        "summary": "Mettre à jour un utilisateur",
+        "description": "Met à jour les informations d'un utilisateur existant.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "ID de l'utilisateur",
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/Utilisateur" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Utilisateur mis à jour" },
+          "404": { "description": "Utilisateur non trouvé" }
+        }
+      },
+      "delete": {
+        "summary": "Supprimer un utilisateur",
+        "description": "Supprime un utilisateur par son ID.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "ID de l'utilisateur",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "204": { "description": "Utilisateur supprimé" },
+          "404": { "description": "Utilisateur non trouvé" }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Utilisateur": {
+        "type": "object",
+        "properties": {
+          "email": { "type": "string", "example": "exemple@mail.com" },
+          "mot_de_passe": { "type": "string", "example": "monmotdepasse" },
+          "nom_utilisateur": { "type": "string", "example": "JeanDupont" }
+        }
+      }
+    }
+  }
+}
