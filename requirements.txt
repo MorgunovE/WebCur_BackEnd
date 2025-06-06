@@ -1,0 +1,9 @@
+Flask
+Flask-RESTful
+Flask-JWT-Extended
+Flask-CORS
+Flask-Swagger-UI
+pymongo
+marshmallow
+python-dotenv
+pytest
