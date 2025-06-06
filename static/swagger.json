@@ -178,6 +178,14 @@
     }
   },
   "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "JWT Authorization avec le préfixe 'Bearer ' Example: \"Authorization: Bearer {token}\""
+      }
+    },
     "schemas": {
       "Utilisateur": {
         "type": "object",
@@ -188,5 +196,8 @@
         }
       }
     }
-  }
+  },
+  "security": [
+    { "bearerAuth": [] }
+  ]
 }
