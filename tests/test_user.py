@@ -19,6 +19,7 @@ def cleanup_users():
         "testuser@mail.com",
         "authuser@mail.com",
         "updateuser@mail.com",
+        "loginuser@mail.com",
         "deleteuser@mail.com"
     ]
     for email in test_emails:
@@ -36,13 +37,13 @@ def test_register_user(client):
     assert "id" in data
 
 def test_authenticate_user(client):
-    # Register first
+    # Register L'utilisateur
     client.post('/utilisateurs', json={
         "email": "authuser@mail.com",
         "mot_de_passe": "authpass",
         "nom_utilisateur": "AuthUser"
     })
-    # Authenticate
+    # Authenticate L'utilisateur
     response = client.post('/connexion', json={
         "email": "authuser@mail.com",
         "mot_de_passe": "authpass"
@@ -57,27 +58,59 @@ def test_get_users(client):
     assert isinstance(response.get_json(), list)
 
 def test_update_user(client):
-    # Register user
+    # Register L'utilisateur
     res = client.post('/utilisateurs', json={
         "email": "updateuser@mail.com",
         "mot_de_passe": "updatepass",
         "nom_utilisateur": "UpdateUser"
     })
     user_id = res.get_json()["id"]
-    # Update user
+    # Mettre à jour L'utilisateur
     response = client.put(f'/utilisateurs/{user_id}', json={
         "nom_utilisateur": "UpdatedName"
     })
     assert response.status_code == 200
 
 def test_delete_user(client):
-    # Register user
+    # Register L'utilisateur
     res = client.post('/utilisateurs', json={
         "email": "deleteuser@mail.com",
         "mot_de_passe": "deletepass",
         "nom_utilisateur": "DeleteUser"
     })
     user_id = res.get_json()["id"]
-    # Delete user
+    # Supprimer L'utilisateur
     response = client.delete(f'/utilisateurs/{user_id}')
     assert response.status_code == 204
+
+def test_connexion_success(client):
+    # Register L'utilisateur
+    client.post('/utilisateurs', json={
+        "email": "loginuser@mail.com",
+        "mot_de_passe": "loginpass",
+        "nom_utilisateur": "LoginUser"
+    })
+    # Obtenir un token d'accès
+    response = client.post('/connexion', json={
+        "email": "loginuser@mail.com",
+        "mot_de_passe": "loginpass"
+    })
+    assert response.status_code == 200
+    data = response.get_json()
+    assert "access_token" in data
+
+def test_connexion_failure(client):
+    # Obtenir un token d'accès avec des identifiants incorrects
+    response = client.post('/connexion', json={
+        "email": "wrong@mail.com",
+        "mot_de_passe": "wrongpass"
+    })
+    assert response.status_code == 401
+    data = response.get_json()
+    assert data["message"] == "Identifiants invalides"
+
+def test_deconnexion(client):
+    response = client.post('/deconnexion')
+    assert response.status_code == 200
+    data = response.get_json()
+    assert data["message"] == "Déconnexion réussie"
