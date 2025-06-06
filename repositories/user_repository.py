@@ -43,3 +43,7 @@ class UserRepository:
     def supprimer(self, user_id):
         result = self.collection.delete_one({"_id": ObjectId(user_id)})
         return result.deleted_count > 0
+
+    def supprimer_par_email(self, email):
+        result = self.collection.delete_many({"email": email})
+        return result.deleted_count
