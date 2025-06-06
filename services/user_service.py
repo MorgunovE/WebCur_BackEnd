@@ -15,6 +15,10 @@ class UserService:
         except ValidationError as err:
             return {"errors": err.messages}, 400
 
+        # verifier si l'utilisateur existe déjà
+        if self.repo.collection.find_one({"email": user_data["email"]}):
+            return {"message": "Un utilisateur avec cet email existe déjà."}, 409
+
         utilisateur = Utilisateur(**user_data)
         created_user = self.repo.creer(utilisateur)
         return self.schema.dump(created_user), 201
