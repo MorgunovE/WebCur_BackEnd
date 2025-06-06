@@ -5,9 +5,20 @@
     "version": "1.0.0",
     "description": "API de base pour la gestion DB dans projet WebCur."
   },
+  "tags": [
+    {
+      "name": "Utilisateur",
+      "description": "Opérations sur les utilisateurs"
+    },
+    {
+      "name": "Authentification",
+      "description": "Connexion et déconnexion des utilisateurs"
+    }
+  ],
   "paths": {
      "/connexion": {
       "post": {
+        "tags": ["Authentification"],
         "summary": "Connexion utilisateur",
         "description": "Authentifie un utilisateur et retourne un token JWT.",
         "requestBody": {
@@ -76,6 +87,7 @@
     },
     "/deconnexion": {
       "post": {
+        "tags": ["Authentification"],
         "summary": "Déconnexion utilisateur",
         "description": "Déconnecte l'utilisateur (côté client, supprimer le token JWT).",
         "responses": {
@@ -97,6 +109,7 @@
     },
     "/utilisateurs": {
       "get": {
+        "tags": ["Utilisateur"],
         "summary": "Liste des utilisateurs",
         "description": "Récupère la liste de tous les utilisateurs.",
         "responses": {
@@ -114,6 +127,7 @@
         }
       },
       "post": {
+        "tags": ["Utilisateur"],
         "summary": "Créer un utilisateur",
         "description": "Crée un nouvel utilisateur.",
         "requestBody": {
@@ -131,6 +145,7 @@
     },
     "/utilisateurs/{id}": {
         "get": {
+          "tags": ["Utilisateur"],
             "summary": "Récupérer un utilisateur",
             "description": "Récupère les informations d'un utilisateur par son ID.",
             "parameters": [
@@ -155,6 +170,7 @@
             }
         },
       "put": {
+        "tags": ["Utilisateur"],
         "summary": "Mettre à jour un utilisateur",
         "description": "Met à jour les informations d'un utilisateur existant.",
         "parameters": [
@@ -180,6 +196,7 @@
         }
       },
       "delete": {
+        "tags": ["Utilisateur"],
         "summary": "Supprimer un utilisateur",
         "description": "Supprime un utilisateur par son ID.",
         "parameters": [
