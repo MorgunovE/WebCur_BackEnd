@@ -8,6 +8,9 @@ from dotenv import load_dotenv
 from resources.user_resource import UtilisateurListRessource, UtilisateurRessource
 from resources.auth_resource import AuthentificationRessource
 from resources.auth_resource import DeconnexionRessource
+from resources.currency_resource import (
+    DeviseRessource, ConversionRessource, FavorisRessource, PopulairesRessource
+)
 
 
 import os
@@ -36,6 +39,12 @@ api.add_resource(UtilisateurRessource, '/utilisateurs/<string:id>')
 # Enregistrer la ressource d'authentification
 api.add_resource(AuthentificationRessource, '/connexion')
 api.add_resource(DeconnexionRessource, '/deconnexion')
+
+# Enregistrer les ressources de devise
+api.add_resource(DeviseRessource, '/devises/<string:nom>')
+api.add_resource(ConversionRessource, '/devises/conversion')
+api.add_resource(FavorisRessource, '/devises/favoris')
+api.add_resource(PopulairesRessource, '/devises/populaires')
 
 # Configurer Swagger UI
 SWAGGER_URL = app.config['SWAGGER_URL']
