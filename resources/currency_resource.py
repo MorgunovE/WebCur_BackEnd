@@ -66,6 +66,9 @@ class PopulairesRessource(Resource):
     def get(self):
         # Return the most popular currencies
         popular = [c.strip().upper() for c in os.getenv("POPULAR_CURRENCIES", "USD,EUR,GBP,JPY,CAD").split(",")]
-        date_maj = self.service._get_today_str()
-        devises = self.service.repo.lire_les_plus_populaires(popular, date_maj)
-        return [self.service.schema.dump(devise) for devise in devises], 200
+        results = []
+        for code in popular:
+            result = self.service.obtenir_devise(code)
+            if isinstance(result, dict) and "nom" in result:
+                results.append(result)
+        return results, 200
