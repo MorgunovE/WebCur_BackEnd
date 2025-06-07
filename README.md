@@ -9,6 +9,9 @@ API RESTful pour la gestion des utilisateurs et l'accès à des données financi
 - Documentation Swagger (OpenAPI)
 - Sécurité CORS
 - Intégration de plusieurs APIs financières (FMP, ExchangeRate, Alpha Vantage)
+- Gestion des devises populaires : L'endpoint /devises/populaires retourne toujours les informations à jour pour toutes les devises listées dans la variable d'environnement POPULAR_CURRENCIES (par défaut : USD, EUR, GBP, JPY, CAD). Si une devise n'est pas présente dans la base de données pour aujourd'hui, elle est automatiquement récupérée via l'API ExchangeRate, stockée, puis renvoyée.
+- Conversion de devises : L'endpoint /devises/conversion permet de convertir un montant d'une devise à une autre, en utilisant les taux du jour. Si le taux n'est pas en base, il est récupéré à la volée.
+- Favoris devises : Les utilisateurs authentifiés peuvent ajouter, lister et supprimer des devises favorites via /devises/favoris.
 
 ## Technologies utilisées
 
@@ -20,6 +23,7 @@ API RESTful pour la gestion des utilisateurs et l'accès à des données financi
 - MongoDB (pymongo)
 - Marshmallow (validation)
 - Pytest (tests)
+- Requests (pour les appels API externes)
 - Docker
 
 ## Configuration
@@ -82,6 +86,56 @@ Le fichier OpenAPI est en `static/swagger.json`.
 ```sh
 pytest
 ```
+
+## Endpoints API disponibles
+
+| Méthode | Endpoint                       | Description                                                                                 | Authentification |
+|---------|-------------------------------|---------------------------------------------------------------------------------------------|------------------|
+| GET     | `/utilisateurs`               | Liste tous les utilisateurs                                                                 | Non              |
+| POST    | `/utilisateurs`               | Crée un nouvel utilisateur                                                                  | Non              |
+| GET     | `/utilisateurs/{id}`          | Récupère un utilisateur par ID                                                              | Non              |
+| PUT     | `/utilisateurs/{id}`          | Met à jour un utilisateur par ID                                                            | Oui              |
+| DELETE  | `/utilisateurs/{id}`          | Supprime un utilisateur par ID                                                              | Oui              |
+| POST    | `/connexion`                  | Authentifie un utilisateur et retourne un token JWT                                         | Non              |
+| POST    | `/deconnexion`                | Déconnecte l'utilisateur (suppression du token côté client)                                 | Non              |
+| GET     | `/devises/{nom}`              | Récupère les informations d'une devise (ex : USD, EUR)                                      | Non              |
+| POST    | `/devises/conversion`         | Convertit un montant d'une devise à une autre                                               | Oui              |
+| GET     | `/devises/favoris`            | Liste les devises favorites de l'utilisateur                                                | Oui              |
+| POST    | `/devises/favoris`            | Ajoute une devise aux favoris                                                               | Oui              |
+| DELETE  | `/devises/favoris`            | Supprime une devise des favoris                                                             | Oui              |
+| GET     | `/devises/populaires`         | Retourne la liste des devises populaires (toujours à jour, API si besoin)                   | Non              |
+| GET     | `/health`                     | Vérifie l'état de santé de l'API                                                            | Non              |
+| GET     | `/swagger`                    | Accès à la documentation interactive Swagger                                                | Non              |
+
+---
+
+## Détail des endpoints devises
+
+- **/devises/{nom}** :  
+  Retourne les informations complètes d'une devise (code, taux, date, base, conversion_rates).
+
+- **/devises/conversion** :  
+  Corps attendu :  
+  ```json
+  {
+    "code_source": "USD",
+    "code_cible": "EUR",
+    "montant": 100
+  }
+  ```
+  Réponse : montant converti, taux utilisés, date.
+
+- **/devises/favoris** :  
+  - `GET` : liste des favoris  
+  - `POST` : ajouter une devise  
+    Corps : `{ "nom_devise": "EUR" }`  
+  - `DELETE` : supprimer une devise  
+    Corps : `{ "nom_devise": "EUR" }`
+
+- **/devises/populaires** :  
+  Retourne la liste complète des devises populaires, toujours à jour.
+
+---
 
 ## Licence
 
