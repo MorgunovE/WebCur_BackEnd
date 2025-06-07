@@ -16,9 +16,9 @@ class CurrencyService:
         self.schema = DeviseSchema()
         self.api_key = os.getenv("API_KEY_ERAPI")
         self.base_currency = os.getenv("BASE_CURRENCY")
+        self.api_url = os.getenv("EXCHANGERATE_API_URL")
 
     def _get_today_str(self):
-        # Retourne la date du jour au format YYYY-MM-DD
         return datetime.utcnow().strftime("%Y-%m-%d")
 
     def obtenir_devise(self, nom):
@@ -30,9 +30,8 @@ class CurrencyService:
         if devise:
             return self.schema.dump(devise)
 
-        # Si non trouvée, requête à l'API ExchangeRate
-        api_url = os.getenv("EXCHANGERATE_API_URL")
-        url = f"{api_url}/{self.api_key}/latest/{self.base_currency}"
+        # Si non trouvée, requête à l'API ExchangeRate (on ne stocke que la devise de base)
+        url = f"{self.api_url}/{self.api_key}/latest/{self.base_currency}"
         response = requests.get(url)
         if response.status_code != 200:
             return {"message": "Erreur lors de la récupération des taux de change."}, 502
@@ -45,20 +44,27 @@ class CurrencyService:
         date_maj = data.get("time_last_update_utc", self._get_today_str())[:10]
         base_code = data.get("base_code", self.base_currency)
 
-        # Enregistrer chaque devise du jour dans la base
-        for code, taux in conversion_rates.items():
-            d = Devise(
-                nom=code,
-                taux=taux,
+        # On ne stocke que la devise de base
+        d = Devise(
+            nom=base_code,
+            taux=1.0,
+            date_maj=date_maj,
+            base_code=base_code,
+            conversion_rates=conversion_rates
+        )
+        self.repo.creer(d)
+
+        # Retourner la devise demandée (si c'est la base, sinon on la reconstitue à partir des taux)
+        if nom == base_code:
+            return self.schema.dump(d)
+        if nom in conversion_rates:
+            devise = Devise(
+                nom=nom,
+                taux=conversion_rates[nom],
                 date_maj=date_maj,
                 base_code=base_code,
                 conversion_rates=conversion_rates
             )
-            self.repo.creer(d)
-
-        # Retourner la devise demandée
-        devise = self.repo.chercher_par_nom_et_date(nom, date_maj)
-        if devise:
             return self.schema.dump(devise)
         return {"message": "Devise non trouvée après mise à jour."}, 404
 
@@ -66,14 +72,12 @@ class CurrencyService:
         """
         Calcule la conversion d'un montant d'une devise à une autre.
         """
-        # Validation des entrées
         if not isinstance(montant, (int, float)) or montant < 0:
             return {"message": "Montant invalide."}, 400
 
         date_maj = self._get_today_str()
         devise_base = self.repo.chercher_par_nom_et_date(self.base_currency, date_maj)
         if not devise_base:
-            # Si la devise de base n'est pas trouvée, on la récupère via l'API
             self.obtenir_devise(self.base_currency)
             devise_base = self.repo.chercher_par_nom_et_date(self.base_currency, date_maj)
             if not devise_base:
@@ -83,7 +87,6 @@ class CurrencyService:
         if code_source not in rates or code_cible not in rates:
             return {"message": "Devise source ou cible non trouvée."}, 404
 
-        # Calcul de la conversion
         montant_converti = montant / rates[code_source] * rates[code_cible]
         return {
             "code_source": code_source,
@@ -96,22 +99,13 @@ class CurrencyService:
         }
 
     def ajouter_favori(self, user_id, nom_devise):
-        """
-        Ajoute une devise aux favoris de l'utilisateur.
-        """
         self.repo.ajouter_favori(user_id, nom_devise)
         return {"message": "Devise ajoutée aux favoris."}
 
     def supprimer_favori(self, user_id, nom_devise):
-        """
-        Supprime une devise des favoris de l'utilisateur.
-        """
         self.repo.supprimer_favori(user_id, nom_devise)
         return {"message": "Devise supprimée des favoris."}
 
     def lire_favoris(self, user_id):
-        """
-        Récupère la liste des devises favorites de l'utilisateur.
-        """
         favoris = self.repo.lire_favoris_par_utilisateur(user_id)
         return {"favoris": favoris}
