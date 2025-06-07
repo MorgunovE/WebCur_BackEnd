@@ -99,9 +99,12 @@ def test_update_user(client):
             "nom_utilisateur": "UpdateUser"
         })
         user_id = res.get_json()["id"]
-        response = client.put(f'/utilisateurs/{user_id}', json={
-            "nom_utilisateur": "UpdatedName"
-        })
+        token = get_jwt_token(client, "updateuser@mail.com", "updatepass")
+        response = client.put(
+            f'/utilisateurs/{user_id}',
+            json={"nom_utilisateur": "UpdatedName"},
+            headers={"Authorization": f"Bearer {token}"}
+        )
         assert response.status_code == 200
         log_test_result("test_update_user", True)
     except AssertionError:
@@ -117,7 +120,11 @@ def test_delete_user(client):
             "nom_utilisateur": "DeleteUser"
         })
         user_id = res.get_json()["id"]
-        response = client.delete(f'/utilisateurs/{user_id}')
+        token = get_jwt_token(client, "deleteuser@mail.com", "deletepass")
+        response = client.delete(
+            f'/utilisateurs/{user_id}',
+            headers={"Authorization": f"Bearer {token}"}
+        )
         assert response.status_code == 204
         log_test_result("test_delete_user", True)
     except AssertionError:
@@ -170,3 +177,11 @@ def test_deconnexion(client):
     except AssertionError:
         log_test_result("test_deconnexion", False)
         raise
+
+# Obtient le token JWT pour les tests d'authentification
+def get_jwt_token(client, email, mot_de_passe):
+    response = client.post('/connexion', json={
+        "email": email,
+        "mot_de_passe": mot_de_passe
+    })
+    return response.get_json().get("access_token")
