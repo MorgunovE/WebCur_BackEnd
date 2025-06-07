@@ -1,5 +1,6 @@
 from flask import request
 from flask_restful import Resource
+from flask_jwt_extended import jwt_required
 from services.user_service import UserService
 
 # Ressource pour la liste des utilisateurs et la création
@@ -28,6 +29,7 @@ class UtilisateurRessource(Resource):
             return user, 200
         return {"message": "Utilisateur non trouvé"}, 404
 
+    @jwt_required()
     def put(self, id):
         # Mettre à jour un utilisateur
         data = request.get_json()
@@ -36,6 +38,7 @@ class UtilisateurRessource(Resource):
             return {"message": "Utilisateur mis à jour"}, 200
         return {"message": "Utilisateur non trouvé"}, 404
 
+    @jwt_required()
     def delete(self, id):
         # Supprimer un utilisateur
         deleted = self.service.delete(id)
