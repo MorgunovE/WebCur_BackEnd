@@ -3,7 +3,7 @@
   "info": {
     "title": "WebCur API",
     "version": "1.0.0",
-    "description": "API de base pour la gestion DB dans projet WebCur."
+    "description": "API pour la gestion DB dans projet WebCur."
   },
   "tags": [
     {
@@ -13,9 +13,159 @@
     {
       "name": "Authentification",
       "description": "Connexion et déconnexion des utilisateurs"
+    },
+    { "name": "Devise",
+      "description": "Opérations sur les devises"
     }
   ],
   "paths": {
+     "/devises/{nom}": {
+      "get": {
+        "tags": ["Devise"],
+        "summary": "Obtanir une devise par son nom",
+        "parameters": [
+          {
+            "name": "nom",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "example": "CAD" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Devise trouvée",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Devise" }
+              }
+            }
+          },
+          "404": { "description": "Devise non trouvée" }
+        }
+      }
+    },
+    "/devises/conversion": {
+      "post": {
+        "tags": ["Devise"],
+        "summary": "Convertir une devise",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "code_source": { "type": "string", "example": "USD" },
+                  "code_cible": { "type": "string", "example": "CAD" },
+                  "montant": { "type": "number", "example": 100 }
+                },
+                "required": ["code_source", "code_cible", "montant"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Conversion réussie",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ConversionResult" }
+              }
+            }
+          },
+          "400": { "description": "Requête invalide" }
+        }
+      }
+    },
+    "/devises/favoris": {
+      "get": {
+        "tags": ["Devise"],
+        "summary": "Obtenir la liste des devises favorites",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Liste des devises favorites",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "favoris": {
+                      "type": "array",
+                      "items": { "type": "string", "example": "CAD" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Devise"],
+        "summary": "Ajouter une devise aux favoris",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "nom_devise": { "type": "string", "example": "CAD" }
+                },
+                "required": ["nom_devise"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Ajoutée aux favoris" }
+        }
+      },
+      "delete": {
+        "tags": ["Devise"],
+        "summary": "Supprimer une devise des favoris",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "nom_devise": { "type": "string", "example": "EUR" }
+                },
+                "required": ["nom_devise"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Supprimée des favoris" }
+        }
+      }
+    },
+    "/devises/populaires": {
+      "get": {
+        "tags": ["Devise"],
+        "summary": "Obtenir les devises populaires",
+        "responses": {
+          "200": {
+            "description": "Liste des devises populaires",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Devise" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
      "/connexion": {
       "post": {
         "tags": ["Authentification"],
@@ -227,6 +377,31 @@
       }
     },
     "schemas": {
+      "Devise": {
+        "type": "object",
+        "properties": {
+          "nom": { "type": "string", "example": "USD" },
+          "taux": { "type": "number", "example": 1.0 },
+          "date_maj": { "type": "string", "example": "2025-06-07" },
+          "base_code": { "type": "string", "example": "USD" },
+          "conversion_rates": {
+            "type": "object",
+            "additionalProperties": { "type": "number" }
+          }
+        }
+      },
+      "ConversionResult": {
+        "type": "object",
+        "properties": {
+          "code_source": { "type": "string", "example": "USD" },
+          "code_cible": { "type": "string", "example": "EUR" },
+          "montant_source": { "type": "number", "example": 100 },
+          "montant_converti": { "type": "number", "example": 92.5 },
+          "taux_source": { "type": "number", "example": 1.0 },
+          "taux_cible": { "type": "number", "example": 0.925 },
+          "date_maj": { "type": "string", "example": "2025-06-07" }
+        }
+      },
       "Utilisateur": {
         "type": "object",
         "properties": {
