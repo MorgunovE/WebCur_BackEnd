@@ -193,7 +193,8 @@
         "responses": {
           "200": { "description": "Utilisateur mis à jour" },
           "404": { "description": "Utilisateur non trouvé" }
-        }
+        },
+        "security": [{ "bearerAuth": [] }]
       },
       "delete": {
         "tags": ["Utilisateur"],
@@ -211,7 +212,8 @@
         "responses": {
           "204": { "description": "Utilisateur supprimé" },
           "404": { "description": "Utilisateur non trouvé" }
-        }
+        },
+        "security": [{ "bearerAuth": [] }]
       }
     }
   },
