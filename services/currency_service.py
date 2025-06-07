@@ -21,6 +21,15 @@ class CurrencyService:
     def _get_today_str(self):
         return datetime.utcnow().strftime("%Y-%m-%d")
 
+    def _parse_api_date(self, api_date_str):
+        # Example: "Sat, 07 Jun 2025 00:00:01 +0000"
+        try:
+            dt = datetime.strptime(api_date_str, "%a, %d %b %Y %H:%M:%S %z")
+            return dt.strftime("%Y-%m-%d")
+        except Exception:
+            # Si le format est incorrect, on retourne la date d'aujourd'hui
+            return self._get_today_str()
+
     def obtenir_devise(self, nom):
         """
         Récupère la devise pour aujourd'hui, depuis la base ou l'API si besoin.
@@ -41,7 +50,8 @@ class CurrencyService:
             return {"message": "Réponse API ExchangeRate invalide."}, 502
 
         conversion_rates = data.get("conversion_rates", {})
-        date_maj = data.get("time_last_update_utc", self._get_today_str())[:10]
+        api_date_str = data.get("time_last_update_utc", "")
+        date_maj = self._parse_api_date(api_date_str)
         base_code = data.get("base_code", self.base_currency)
 
         # On ne stocke que la devise de base
