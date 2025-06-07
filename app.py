@@ -9,6 +9,7 @@ from resources.user_resource import UtilisateurListRessource, UtilisateurRessour
 from resources.auth_resource import AuthentificationRessource
 from resources.auth_resource import DeconnexionRessource
 
+
 import os
 
 # Charger les variables d'environnement
