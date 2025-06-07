@@ -74,18 +74,18 @@ class CurrencyService:
             return {"message": "Montant invalide."}, 400
 
         date_maj = self._get_today_str()
-        devise_base = self.repo.chercher_par_nom_et_date(self.base_currency, date_maj)
-        if not devise_base:
-            self.obtenir_devise(self.base_currency)
-            devise_base = self.repo.chercher_par_nom_et_date(self.base_currency, date_maj)
-            if not devise_base:
+        devise = self.repo.chercher_par_nom_et_date(code_source, date_maj)
+        if not devise:
+            self.obtenir_devise(code_source)
+            devise = self.repo.chercher_par_nom_et_date(code_source, date_maj)
+            if not devise:
                 return {"message": "Taux de change non disponible."}, 404
 
-        rates = devise_base.conversion_rates
-        if code_source not in rates or code_cible not in rates:
+        rates = devise.conversion_rates
+        if code_cible not in rates:
             return {"message": "Devise source ou cible non trouvée."}, 404
 
-        montant_converti = montant / rates[code_source] * rates[code_cible]
+        montant_converti = montant * rates[code_cible]
         return {
             "code_source": code_source,
             "code_cible": code_cible,
