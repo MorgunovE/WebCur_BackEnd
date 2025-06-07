@@ -39,8 +39,8 @@ class CurrencyService:
         if devise:
             return self.schema.dump(devise)
 
-        # Si non trouvée, requête à l'API ExchangeRate (on ne stocke que la devise de base)
-        url = f"{self.api_url}/{self.api_key}/latest/{self.base_currency}"
+        # Si non trouvée, requête à l'API ExchangeRate
+        url = f"{self.api_url}/{self.api_key}/latest/{nom}"
         response = requests.get(url)
         if response.status_code != 200:
             return {"message": "Erreur lors de la récupération des taux de change."}, 502
@@ -54,29 +54,17 @@ class CurrencyService:
         date_maj = self._parse_api_date(api_date_str)
         base_code = data.get("base_code", self.base_currency)
 
-        # On ne stocke que la devise de base
-        d = Devise(
+        # Ajouter la devise à la base de données
+        devise = Devise(
             nom=base_code,
             taux=1.0,
             date_maj=date_maj,
             base_code=base_code,
             conversion_rates=conversion_rates
         )
-        self.repo.creer(d)
+        self.repo.creer(devise)
+        return self.schema.dump(devise)
 
-        # Retourner la devise demandée (si c'est la base, sinon on la reconstitue à partir des taux)
-        if nom == base_code:
-            return self.schema.dump(d)
-        if nom in conversion_rates:
-            devise = Devise(
-                nom=nom,
-                taux=conversion_rates[nom],
-                date_maj=date_maj,
-                base_code=base_code,
-                conversion_rates=conversion_rates
-            )
-            return self.schema.dump(devise)
-        return {"message": "Devise non trouvée après mise à jour."}, 404
 
     def convertir(self, code_source, code_cible, montant):
         """
