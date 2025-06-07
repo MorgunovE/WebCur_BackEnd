@@ -1,6 +1,6 @@
 import os
 import requests
-from datetime import datetime
+from datetime import datetime, UTC
 from repositories.currency_repository import CurrencyRepository
 from models.currency import Devise
 from schemas.currency import DeviseSchema
@@ -19,7 +19,7 @@ class CurrencyService:
         self.api_url = os.getenv("EXCHANGERATE_API_URL")
 
     def _get_today_str(self):
-        return datetime.utcnow().strftime("%Y-%m-%d")
+        return datetime.now(UTC).strftime("%Y-%m-%d")
 
     def _parse_api_date(self, api_date_str):
         # Example: "Sat, 07 Jun 2025 00:00:01 +0000"
