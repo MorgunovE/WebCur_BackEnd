@@ -3,6 +3,7 @@ Flask-RESTful
 Flask-JWT-Extended
 Flask-CORS
 Flask-Swagger-UI
+requests
 pymongo
 marshmallow
 python-dotenv
