@@ -53,8 +53,14 @@ def health():
     return jsonify({"status": "ok"})
 
 @app.route('/')
-def hello_world():
-    return 'WebCur backend démarré avec succès! Allez sur /swagger pour la documentation API.'
+def startApp():
+    return (
+        '<h2>WebCur backend started successfully! / WebCur backend démarré avec succès!</h2>'
+        '<p>'
+        'Go to <a href="/swagger" target="_blank">/swagger</a> for the API documentation.<br>'
+        'Allez sur <a href="/swagger" target="_blank">/swagger</a> pour la documentation API.'
+        '</p>'
+    ), 200, {'Content-Type': 'text/html'}
 
 if __name__ == '__main__':
     app.run(debug=True)
