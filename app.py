@@ -55,10 +55,10 @@ def health():
 @app.route('/')
 def startApp():
     return (
-        '<h2>WebCur backend started successfully! / WebCur backend démarré avec succès!</h2>'
+        '<h2> WebCur backend démarré avec succès! / WebCur backend started successfully!</h2>'
         '<p>'
-        'Go to <a href="/swagger" target="_blank">/swagger</a> for the API documentation.<br>'
-        'Allez sur <a href="/swagger" target="_blank">/swagger</a> pour la documentation API.'
+        'Allez sur <a href="/swagger" target="_blank">/swagger</a> pour la documentation API.<br>'
+        'Go to <a href="/swagger" target="_blank">/swagger</a> for the API documentation.'
         '</p>'
     ), 200, {'Content-Type': 'text/html'}
 
