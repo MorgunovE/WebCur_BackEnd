@@ -11,6 +11,12 @@ from resources.auth_resource import DeconnexionRessource
 from resources.currency_resource import (
     DeviseRessource, ConversionRessource, FavorisRessource, PopulairesRessource
 )
+from resources.stock_resource import (
+    ActionRessource,
+    CalculerAchatRessource,
+    PopulairesActionsRessource,
+    FavorisActionsRessource
+)
 
 
 import os
@@ -45,6 +51,12 @@ api.add_resource(DeviseRessource, '/devises/<string:nom>')
 api.add_resource(ConversionRessource, '/devises/conversion')
 api.add_resource(FavorisRessource, '/devises/favoris')
 api.add_resource(PopulairesRessource, '/devises/populaires')
+
+# Enregistrer les ressources d'action
+api.add_resource(ActionRessource, '/actions/<string:symbole>')
+api.add_resource(CalculerAchatRessource, '/actions/calculer')
+api.add_resource(PopulairesActionsRessource, '/actions/populaires')
+api.add_resource(FavorisActionsRessource, '/actions/favoris')
 
 # Configurer Swagger UI
 SWAGGER_URL = app.config['SWAGGER_URL']
