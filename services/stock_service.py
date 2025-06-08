@@ -114,7 +114,15 @@ class StockService:
             self.obtenir_action(symbole, date)
             action = self.repo.chercher_par_symbole_et_date(symbole, date)
             if not action:
-                return {"message": "Données d'action non disponibles."}, 404
+                # Fallback: utiliser la dernière date disponible
+                latest_dates = self.repo.get_all_dates_for_symbol(symbole)
+                if latest_dates:
+                    latest_date = sorted(latest_dates, reverse=True)[0]
+                    action = self.repo.chercher_par_symbole_et_date(symbole, latest_date)
+                    if action:
+                        date = latest_date  # Mettre à jour la date utilisée
+                if not action:
+                    return {"message": "Données d'action non disponibles."}, 404
 
         montant_usd = action.close * quantite
         if code_devise.upper() == "USD":
