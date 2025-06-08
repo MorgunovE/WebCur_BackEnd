@@ -63,7 +63,7 @@ def test_calculate_purchase_cost(client):
     client.get('/actions/AAPL')
     response = client.post(
         '/actions/calculer',
-        json={"symbole": "AAPL", "date": "2025-06-07", "quantite": 2, "code_devise": "USD"},
+        json={"symbole": "AAPL", "date": "2025-06-06", "quantite": 2, "code_devise": "USD"},
         headers={"Authorization": f"Bearer {token}"}
     )
     assert response.status_code == 200
@@ -74,7 +74,7 @@ def test_calculate_purchase_cost(client):
 def test_calculate_purchase_cost_unauth(client):
     response = client.post(
         '/actions/calculer',
-        json={"symbole": "AAPL", "date": "2025-06-07", "quantite": 2, "code_devise": "USD"}
+        json={"symbole": "AAPL", "date": "2025-06-06", "quantite": 2, "code_devise": "USD"}
     )
     assert response.status_code == 401
 
