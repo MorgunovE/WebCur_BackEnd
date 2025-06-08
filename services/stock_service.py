@@ -72,7 +72,16 @@ class StockService:
         action = self.repo.chercher_par_symbole_et_date(symbole, date)
         if action:
             return self.schema.dump(action)
-        return {"message": "Aucune donnée pour cette date."}, 404
+        if not action:
+            # Si aucune donnée n'est trouvée, retourner la dernière donnée disponible
+            latest_doc = self.repo.collection.find_one(
+                {"symbole": symbole},
+                sort=[("date", -1)]
+            )
+            if latest_doc:
+                action = Action.from_dict(latest_doc)
+                return self.schema.dump(action)
+            return {"message": "Aucune donnée pour cette action."}, 404
 
     def calculer_cout_achat(self, symbole, date, quantite, code_devise):
         """
