@@ -200,16 +200,17 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "access_token": {
-                      "type": "string",
-                      "description": "JWT access token"
-                    }
+                    "access_token": { "type": "string", "description": "JWT access token" },
+                    "id": { "type": "string", "description": "User ID" },
+                    "nom_utilisateur": { "type": "string", "description": "Username" }
                   }
                 },
                 "examples": {
                   "success": {
                     "value": {
-                      "access_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..."
+                      "access_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...",
+                      "id": "665f1b2c8e4b0c1a2b3c4d5e",
+                      "nom_utilisateur": "JeanDupont"
                     }
                   }
                 }
