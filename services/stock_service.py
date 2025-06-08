@@ -22,14 +22,14 @@ class StockService:
 
     def obtenir_action(self, symbole, date=None):
         """
-        Récupère les données d'une action pour un symbole donné, avec option de date.
+        Retrieve stock data for a given symbol, optionally for a specific date.
         """
+        # 1. If date is provided, try DB first
         if date:
-            # Date fournie: chercher dans la base de données
             action = self.repo.chercher_par_symbole_et_date(symbole, date)
             if action:
                 return self.schema.dump(action)
-            # Si non trouvé, essayer de récupérer depuis l'API
+            # Not found, try API for that date
             api_data = self._fetch_action_from_api(symbole, date)
             if not api_data:
                 return {"message": "Données d'action non disponibles."}, 404
@@ -37,17 +37,27 @@ class StockService:
             self.repo.creer(action_obj)
             return self.schema.dump(action_obj)
 
-        # Pas de date fournie: chercher pour aujourd'hui
-        date = self._get_today_str()
-        action = self.repo.chercher_par_symbole_et_date(symbole, date)
+        # 2. No date: use today
+        date_today = self._get_today_str()
+        action = self.repo.chercher_par_symbole_et_date(symbole, date_today)
         if action:
             return self.schema.dump(action)
+        # Not found, try API for today, fallback to latest
+        api_data = self._fetch_action_from_api(symbole, date_today)
+        if not api_data:
+            return {"message": "Données d'action non disponibles."}, 404
+        action_obj = Action(**api_data)
+        self.repo.creer(action_obj)
+        return self.schema.dump(action_obj)
 
-        # Si non trouvé, essayer de récupérer depuis l'API
+    def _fetch_action_from_api(self, symbole, date):
+        """
+        Fetch action data from Alpha Vantage API for a given symbol and date.
+        """
         url = os.getenv("ALPHAVANTAGE_API_URL", "https://www.alphavantage.co/query")
         function = os.getenv("ALPHAVANTAGE_FUNCTION", "TIME_SERIES_DAILY")
         if not self.api_key:
-            return {"message": "API_KEY_AV non défini dans l'environnement."}, 500
+            return None
         params = {
             "function": function,
             "symbol": symbole,
@@ -55,46 +65,29 @@ class StockService:
         }
         response = requests.get(url, params=params)
         if response.status_code != 200:
-            return {"message": "Erreur lors de la récupération des données Alpha Vantage."}, 502
-
+            return None
         data = response.json()
-        if "Time Series (Daily)" not in data:
-            return {"message": "Réponse API Alpha Vantage invalide."}, 502
-
-        series = data["Time Series (Daily)"]
-        dates = list(series.keys())
-        existantes = self.repo.chercher_dates_existantes(symbole, dates)
-        nouvelles = [d for d in dates if d not in existantes]
-        actions = []
-        for d in nouvelles:
-            info = series[d]
-            action = Action(
-                symbole=symbole,
-                date=d,
-                open=float(info["1. open"]),
-                high=float(info["2. high"]),
-                low=float(info["3. low"]),
-                close=float(info["4. close"]),
-                volume=int(info["5. volume"])
-            )
-            actions.append(action)
-        if actions:
-            self.repo.creer_plusieurs(actions)
-
-        # Rechercher à nouveau après l'insertion
-        action = self.repo.chercher_par_symbole_et_date(symbole, date)
-        if action:
-            return self.schema.dump(action)
-
-        # Si toujours pas trouvé, retourner une erreur
-        latest_doc = self.repo.collection.find_one(
-            {"symbole": symbole},
-            sort=[("date", -1)]
-        )
-        if latest_doc:
-            action = Action.from_dict(latest_doc)
-            return self.schema.dump(action)
-        return {"message": "Aucune donnée pour cette action."}, 404
+        time_series = data.get("Time Series (Daily)", {})
+        if not time_series:
+            return None
+        # Use the requested date or the latest available
+        if date and date in time_series:
+            day_data = time_series[date]
+            used_date = date
+        else:
+            # Get the latest date
+            latest_date = sorted(time_series.keys())[-1]
+            day_data = time_series[latest_date]
+            used_date = latest_date
+        return {
+            "symbole": symbole,
+            "date": used_date,
+            "open": float(day_data["1. open"]),
+            "high": float(day_data["2. high"]),
+            "low": float(day_data["3. low"]),
+            "close": float(day_data["4. close"]),
+            "volume": int(day_data["5. volume"])
+        }
 
     def calculer_cout_achat(self, symbole, date, quantite, code_devise):
         """
