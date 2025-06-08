@@ -94,7 +94,7 @@
                 }
               }
             },
-            "400": { "description": "Requête invalide" },
+            "400": { "description": "Requête invalide" }
           }
         }
       },
