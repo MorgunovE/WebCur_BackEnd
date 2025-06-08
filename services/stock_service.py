@@ -22,7 +22,7 @@ class StockService:
 
     def obtenir_action(self, symbole, date=None):
         """
-        Retrieve stock data for a given symbol, optionally for a specific date.
+        Récupère les données d'une action pour un symbole donné, avec option de date.
         """
         if date:
             action = self.repo.chercher_par_symbole_et_date(symbole, date)
@@ -31,17 +31,17 @@ class StockService:
             api_data = self._fetch_action_from_api(symbole)
             if not api_data or "series" not in api_data:
                 return {"message": "Données d'action non disponibles."}, 404
-            # Get existing dates from DB
+            # Vérifier les dates existantes dans la base de données
             all_dates = [a.date for a in api_data["series"]]
             existing_dates = self.repo.chercher_dates_existantes(symbole, all_dates)
-            # Filter only new actions
+            # Filtrer les nouvelles actions à ajouter
             new_actions = [a for a in api_data["series"] if a.date not in existing_dates]
             if new_actions:
                 self.repo.creer_plusieurs(new_actions)
             action = self.repo.chercher_par_symbole_et_date(symbole, date)
             if action:
                 return self.schema.dump(action)
-            # Fallback: return latest available date in DB
+            # Si aucune action trouvée pour la date spécifique, on retourne la dernière date disponible
             latest_dates = self.repo.get_all_dates_for_symbol(symbole)
             if latest_dates:
                 latest_date = sorted(latest_dates, reverse=True)[0]
@@ -72,8 +72,8 @@ class StockService:
 
     def _fetch_action_from_api(self, symbole):
         """
-        Fetch all available action data from Alpha Vantage API for a given symbol.
-        Returns a dict with a list of Action objects under 'series'.
+        Récupère les données d'une action depuis l'API Alpha Vantage.
+        Si l'API ne retourne pas de données, retourne None.
         """
         url = os.getenv("ALPHAVANTAGE_API_URL", "https://www.alphavantage.co/query")
         function = os.getenv("ALPHAVANTAGE_FUNCTION", "TIME_SERIES_DAILY")
@@ -106,7 +106,7 @@ class StockService:
 
     def calculer_cout_achat(self, symbole, date, quantite, code_devise):
         """
-        Calcule le coût d'achat d'un certain nombre d'actions avec conversion de devise.
+        Calcule le coût d'achat d'une action pour un symbole donné, à une date spécifique.
         """
         action = self.repo.chercher_par_symbole_et_date(symbole, date)
         if not action:
@@ -133,7 +133,7 @@ class StockService:
                 "devise": "USD",
                 "cout_total": round(montant_usd, 2)
             }
-        # Conversion via CurrencyService
+        # Conversion de la devise
         conversion = self.currency_service.convertir("USD", code_devise.upper(), montant_usd)
         if isinstance(conversion, tuple):  # error
             return conversion
