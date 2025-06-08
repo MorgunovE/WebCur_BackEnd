@@ -107,3 +107,15 @@ class StockService:
             "cout_total": conversion["montant_converti"],
             "taux": conversion["taux_cible"]
         }
+
+    def ajouter_favori(self, user_id, symbole):
+        self.repo.ajouter_favori(user_id, symbole)
+        return {"message": "Action ajoutée aux favoris."}
+
+    def supprimer_favori(self, user_id, symbole):
+        self.repo.supprimer_favori(user_id, symbole)
+        return {"message": "Action supprimée des favoris."}
+
+    def lire_favoris(self, user_id):
+        favoris = self.repo.lire_favoris_par_utilisateur(user_id)
+        return {"favoris": favoris}
