@@ -19,7 +19,11 @@ class AuthentificationRessource(Resource):
         if utilisateur:
             # Générer un token JWT
             access_token = create_access_token(identity=utilisateur["id"])
-            return {"access_token": access_token}, 200
+            return {
+                "access_token": access_token,
+                "id": utilisateur["id"],
+                "nom_utilisateur": utilisateur["nom_utilisateur"]
+            }, 200
         return {"message": "Identifiants invalides"}, 401
 
 # Ressource pour la déconnexion (JWT)
