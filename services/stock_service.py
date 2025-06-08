@@ -24,35 +24,56 @@ class StockService:
         """
         Retrieve stock data for a given symbol, optionally for a specific date.
         """
-        # 1. If date is provided, try DB first
         if date:
             action = self.repo.chercher_par_symbole_et_date(symbole, date)
             if action:
                 return self.schema.dump(action)
-            # Not found, try API for that date
-            api_data = self._fetch_action_from_api(symbole, date)
-            if not api_data:
+            api_data = self._fetch_action_from_api(symbole)
+            if not api_data or "series" not in api_data:
                 return {"message": "Données d'action non disponibles."}, 404
-            action_obj = Action(**api_data)
-            self.repo.creer(action_obj)
-            return self.schema.dump(action_obj)
-
-        # 2. No date: use today
-        date_today = self._get_today_str()
-        action = self.repo.chercher_par_symbole_et_date(symbole, date_today)
-        if action:
-            return self.schema.dump(action)
-        # Not found, try API for today, fallback to latest
-        api_data = self._fetch_action_from_api(symbole, date_today)
-        if not api_data:
+            # Get existing dates from DB
+            all_dates = [a.date for a in api_data["series"]]
+            existing_dates = self.repo.chercher_dates_existantes(symbole, all_dates)
+            # Filter only new actions
+            new_actions = [a for a in api_data["series"] if a.date not in existing_dates]
+            if new_actions:
+                self.repo.creer_plusieurs(new_actions)
+            action = self.repo.chercher_par_symbole_et_date(symbole, date)
+            if action:
+                return self.schema.dump(action)
+            # Fallback: return latest available date in DB
+            latest_dates = self.repo.get_all_dates_for_symbol(symbole)
+            if latest_dates:
+                latest_date = sorted(latest_dates, reverse=True)[0]
+                action = self.repo.chercher_par_symbole_et_date(symbole, latest_date)
+                if action:
+                    return self.schema.dump(action)
             return {"message": "Données d'action non disponibles."}, 404
-        action_obj = Action(**api_data)
-        self.repo.creer(action_obj)
-        return self.schema.dump(action_obj)
+        else:
+            date_today = self._get_today_str()
+            action = self.repo.chercher_par_symbole_et_date(symbole, date_today)
+            if action:
+                return self.schema.dump(action)
+            api_data = self._fetch_action_from_api(symbole)
+            if not api_data or "series" not in api_data:
+                return {"message": "Données d'action non disponibles."}, 404
+            all_dates = [a.date for a in api_data["series"]]
+            existing_dates = self.repo.chercher_dates_existantes(symbole, all_dates)
+            new_actions = [a for a in api_data["series"] if a.date not in existing_dates]
+            if new_actions:
+                self.repo.creer_plusieurs(new_actions)
+            latest_dates = self.repo.get_all_dates_for_symbol(symbole)
+            if latest_dates:
+                latest_date = sorted(latest_dates, reverse=True)[0]
+                action = self.repo.chercher_par_symbole_et_date(symbole, latest_date)
+                if action:
+                    return self.schema.dump(action)
+            return {"message": "Données d'action non disponibles."}, 404
 
-    def _fetch_action_from_api(self, symbole, date):
+    def _fetch_action_from_api(self, symbole):
         """
-        Fetch action data from Alpha Vantage API for a given symbol and date.
+        Fetch all available action data from Alpha Vantage API for a given symbol.
+        Returns a dict with a list of Action objects under 'series'.
         """
         url = os.getenv("ALPHAVANTAGE_API_URL", "https://www.alphavantage.co/query")
         function = os.getenv("ALPHAVANTAGE_FUNCTION", "TIME_SERIES_DAILY")
@@ -70,24 +91,18 @@ class StockService:
         time_series = data.get("Time Series (Daily)", {})
         if not time_series:
             return None
-        # Use the requested date or the latest available
-        if date and date in time_series:
-            day_data = time_series[date]
-            used_date = date
-        else:
-            # Get the latest date
-            latest_date = sorted(time_series.keys())[-1]
-            day_data = time_series[latest_date]
-            used_date = latest_date
-        return {
-            "symbole": symbole,
-            "date": used_date,
-            "open": float(day_data["1. open"]),
-            "high": float(day_data["2. high"]),
-            "low": float(day_data["3. low"]),
-            "close": float(day_data["4. close"]),
-            "volume": int(day_data["5. volume"])
-        }
+        series = []
+        for d, day_data in time_series.items():
+            series.append(Action(
+                symbole=symbole,
+                date=d,
+                open=float(day_data["1. open"]),
+                high=float(day_data["2. high"]),
+                low=float(day_data["3. low"]),
+                close=float(day_data["4. close"]),
+                volume=int(day_data["5. volume"])
+            ))
+        return {"series": series}
 
     def calculer_cout_achat(self, symbole, date, quantite, code_devise):
         """
