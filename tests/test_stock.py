@@ -57,7 +57,7 @@ def test_calculate_stock_purchase(client):
         token = get_jwt_token(client)
         response = client.post(
             '/actions/calculer',
-            json={"symbole": "AAPL", "date": "2025-06-07", "quantite": 5, "code_devise": "USD"},
+            json={"symbole": "AAPL", "date": "2025-06-06", "quantite": 5, "code_devise": "USD"},
             headers={"Authorization": f"Bearer {token}"}
         )
         assert response.status_code == 200
