@@ -13,6 +13,7 @@ class StockRepository:
         self.client = MongoClient(uri)
         self.db = self.client[dbname]
         self.collection = self.db["actions"]
+        self.favoris_collection = self.db["favoris_actions"]
 
     def chercher_par_symbole_et_date(self, symbole, date):
         """
@@ -53,3 +54,20 @@ class StockRepository:
         for action, inserted_id in zip(actions, result.inserted_ids):
             action.id = str(inserted_id)
         return actions
+
+    def ajouter_favori(self, user_id, symbole):
+        self.favoris_collection.update_one(
+            {"user_id": user_id},
+            {"$addToSet": {"actions": symbole}},
+            upsert=True
+        )
+
+    def supprimer_favori(self, user_id, symbole):
+        self.favoris_collection.update_one(
+            {"user_id": user_id},
+            {"$pull": {"actions": symbole}}
+        )
+
+    def lire_favoris_par_utilisateur(self, user_id):
+        doc = self.favoris_collection.find_one({"user_id": user_id})
+        return doc["actions"] if doc and "actions" in doc else []
