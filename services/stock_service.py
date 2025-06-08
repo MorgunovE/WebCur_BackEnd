@@ -22,15 +22,28 @@ class StockService:
 
     def obtenir_action(self, symbole, date=None):
         """
-        Récupère les données d'une action pour une date donnée (ou aujourd'hui).
+        Récupère les données d'une action pour un symbole donné, avec option de date.
         """
-        if not date:
-            date = self._get_today_str()
+        if date:
+            # Date fournie: chercher dans la base de données
+            action = self.repo.chercher_par_symbole_et_date(symbole, date)
+            if action:
+                return self.schema.dump(action)
+            # Si non trouvé, essayer de récupérer depuis l'API
+            api_data = self._fetch_action_from_api(symbole, date)
+            if not api_data:
+                return {"message": "Données d'action non disponibles."}, 404
+            action_obj = Action(**api_data)
+            self.repo.creer(action_obj)
+            return self.schema.dump(action_obj)
+
+        # Pas de date fournie: chercher pour aujourd'hui
+        date = self._get_today_str()
         action = self.repo.chercher_par_symbole_et_date(symbole, date)
         if action:
             return self.schema.dump(action)
 
-        # Si non trouvée, requête à l'API Alpha Vantage
+        # Si non trouvé, essayer de récupérer depuis l'API
         url = os.getenv("ALPHAVANTAGE_API_URL", "https://www.alphavantage.co/query")
         function = os.getenv("ALPHAVANTAGE_FUNCTION", "TIME_SERIES_DAILY")
         if not self.api_key:
@@ -68,20 +81,20 @@ class StockService:
         if actions:
             self.repo.creer_plusieurs(actions)
 
-        # Retourner la donnée demandée (après insertion)
+        # Rechercher à nouveau après l'insertion
         action = self.repo.chercher_par_symbole_et_date(symbole, date)
         if action:
             return self.schema.dump(action)
-        if not action:
-            # Si aucune donnée n'est trouvée, retourner la dernière donnée disponible
-            latest_doc = self.repo.collection.find_one(
-                {"symbole": symbole},
-                sort=[("date", -1)]
-            )
-            if latest_doc:
-                action = Action.from_dict(latest_doc)
-                return self.schema.dump(action)
-            return {"message": "Aucune donnée pour cette action."}, 404
+
+        # Si toujours pas trouvé, retourner une erreur
+        latest_doc = self.repo.collection.find_one(
+            {"symbole": symbole},
+            sort=[("date", -1)]
+        )
+        if latest_doc:
+            action = Action.from_dict(latest_doc)
+            return self.schema.dump(action)
+        return {"message": "Aucune donnée pour cette action."}, 404
 
     def calculer_cout_achat(self, symbole, date, quantite, code_devise):
         """
