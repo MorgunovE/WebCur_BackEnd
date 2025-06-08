@@ -74,6 +74,8 @@ def test_authenticate_user(client):
         assert response.status_code == 200
         data = response.get_json()
         assert "access_token" in data
+        assert "id" in data
+        assert "nom_utilisateur" in data
         log_test_result("test_authenticate_user", True)
     except AssertionError:
         log_test_result("test_authenticate_user", False)
