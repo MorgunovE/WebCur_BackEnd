@@ -12,6 +12,9 @@ API RESTful pour la gestion des utilisateurs et l'accès à des données financi
 - Gestion des devises populaires : L'endpoint /devises/populaires retourne toujours les informations à jour pour toutes les devises listées dans la variable d'environnement POPULAR_CURRENCIES (par défaut : USD, EUR, GBP, JPY, CAD). Si une devise n'est pas présente dans la base de données pour aujourd'hui, elle est automatiquement récupérée via l'API ExchangeRate, stockée, puis renvoyée.
 - Conversion de devises : L'endpoint /devises/conversion permet de convertir un montant d'une devise à une autre, en utilisant les taux du jour. Si le taux n'est pas en base, il est récupéré à la volée.
 - Favoris devises : Les utilisateurs authentifiés peuvent ajouter, lister et supprimer des devises favorites via /devises/favoris.
+- Gestion des actions favorites pour les utilisateurs (endpoints `/actions/favoris`)
+- Endpoint pour calculer le coût d'achat d'une action avec conversion de devise (`/actions/calculer`)
+- Messages d'erreur pour les opérations sur les actions et devises
 
 ## Technologies utilisées
 
@@ -106,7 +109,10 @@ pytest
 | GET     | `/devises/populaires`         | Retourne la liste des devises populaires (toujours à jour, API si besoin)                   | Non              |
 | GET     | `/health`                     | Vérifie l'état de santé de l'API                                                            | Non              |
 | GET     | `/swagger`                    | Accès à la documentation interactive Swagger                                                | Non              |
-
+| POST    | `/actions/calculer`           | Calculer le coût d'achat d'une action                  | Oui              |
+| GET     | `/actions/favoris`            | Liste des actions favorites de l'utilisateur           | Oui              |
+| POST    | `/actions/favoris`            | Ajouter une action aux favoris                         | Oui              |
+| DELETE  | `/actions/favoris`            | Supprimer une action des favoris                       | Oui              |
 ---
 
 ## Détail des endpoints devises
@@ -137,6 +143,25 @@ pytest
 
 ---
 
+### Exemple: Ajouter une action aux favoris
+
+```bash
+curl -X POST http://localhost:5000/actions/favoris \
+  -H "Authorization: Bearer <votre_token_jwt>" \
+  -H "Content-Type: application/json" \
+  -d '{"symbole": "AAPL"}'
+```
+
+### Exemple: Calculer le coût d'achat d'une action
+
+```bash
+curl -X POST http://localhost:5000/actions/calculer \
+  -H "Authorization: Bearer <votre_token_jwt>" \
+  -H "Content-Type: application/json" \
+  -d '{"symbole": "AAPL", "date": "2025-06-07", "quantite": 10, "code_devise": "EUR"}'
+```
+
+---
 ## Licence
 
 MIT License © 2025 Morgunov Evgenii
