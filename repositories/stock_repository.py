@@ -43,6 +43,10 @@ class StockRepository:
         )
         return [doc["date"] for doc in cursor]
 
+    def get_all_dates_for_symbol(self, symbole):
+        cursor = self.collection.find({"symbole": symbole}, {"date": 1, "_id": 0})
+        return [doc["date"] for doc in cursor]
+
     def creer_plusieurs(self, actions):
         """
         Ajoute plusieurs actions en une seule opération.
