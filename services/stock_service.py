@@ -5,7 +5,6 @@ from repositories.stock_repository import StockRepository
 from models.stock import Action
 from schemas.stock import ActionSchema
 from services.currency_service import CurrencyService
-from marshmallow import ValidationError
 
 class StockService:
     """
@@ -32,8 +31,10 @@ class StockService:
             return self.schema.dump(action)
 
         # Si non trouvée, requête à l'API Alpha Vantage
-        url = os.getenv("ALPHAVANTAGE_API_URL")
-        function = os.getenv("ALPHAVANTAGE_FUNCTION")
+        url = os.getenv("ALPHAVANTAGE_API_URL", "https://www.alphavantage.co/query")
+        function = os.getenv("ALPHAVANTAGE_FUNCTION", "TIME_SERIES_DAILY")
+        if not self.api_key:
+            return {"message": "API_KEY_AV non défini dans l'environnement."}, 500
         params = {
             "function": function,
             "symbol": symbole,
