@@ -53,6 +53,72 @@
         }
       }
     },
+    "/actions/{symbole}/historique": {
+      "get": {
+        "tags": ["Actions"],
+        "summary": "Obtenir l'historique d'une action",
+        "description": "Récupère l'historique des entrées d'une action. Vous pouvez spécifier une période avec les paramètres `date_debut` et `date_fin` (format AAAA-MM-JJ), ou un nombre de jours avec `jours` (minimum 4). Au moins l'un des deux modes est requis.",
+        "parameters": [
+          {
+            "name": "symbole",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "example": "AAPL" },
+            "description": "Stock symbol"
+          },
+          {
+            "name": "jours",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "integer", "minimum": 4, "example": 7 },
+            "description": "Numero de jours pour l'historique (minimum 4)"
+          },
+          {
+            "name": "date_debut",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "string", "format": "date", "example": "2025-06-01" },
+            "description": "Start date (YYYY-MM-DD)"
+          },
+          {
+            "name": "date_fin",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "string", "format": "date", "example": "2025-06-10" },
+            "description": "End date (YYYY-MM-DD)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Historique de l'action",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Action" }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Requête invalide, paramètres manquants ou invalides",
+            "content": {
+              "application/json": {
+                "schema": { "type": "object", "properties": { "message": { "type": "string" } } }
+              }
+            }
+          },
+          "404": {
+            "description": "Action non trouvée",
+            "content": {
+              "application/json": {
+                "schema": { "type": "object", "properties": { "message": { "type": "string" } } }
+              }
+            }
+          }
+        }
+      }
+    },
     "/actions/calculer": {
       "post": {
         "tags": ["Action"],
