@@ -1,5 +1,6 @@
 from pymongo import MongoClient, ASCENDING, DESCENDING
 from bson.objectid import ObjectId
+from typing import List
 from models.currency import Devise
 import os
 
@@ -24,6 +25,26 @@ class CurrencyRepository:
         if doc:
             return Devise.from_dict(doc)
         return None
+
+    def lire_historique_par_nom(self, nom: str, dates: list) -> list:
+        """
+        Récupère l'historique d'une devise pour une liste de dates.
+        """
+        cursor = self.collection.find({
+            "nom": nom,
+            "date_maj": {"$in": dates}
+        })
+        return [Devise.from_dict(doc) for doc in cursor]
+
+    def lire_historique_sur_periode(self, nom: str, date_debut: str, date_fin: str) -> list:
+        """
+        Récupère l'historique d'une devise pour une période donnée (dates inclusives).
+        """
+        cursor = self.collection.find({
+            "nom": nom,
+            "date_maj": {"$gte": date_debut, "$lte": date_fin}
+        }).sort("date_maj", 1)
+        return [Devise.from_dict(doc) for doc in cursor]
 
     def creer(self, devise: Devise):
         """
