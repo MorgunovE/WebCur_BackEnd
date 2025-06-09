@@ -54,6 +54,11 @@ class CurrencyService:
         date_maj = self._parse_api_date(api_date_str)
         base_code = data.get("base_code", self.base_currency)
 
+        # Vérifier à nouveau si la devise existe (race condition possible)
+        devise = self.repo.chercher_par_nom_et_date(base_code, date_maj)
+        if devise:
+            return self.schema.dump(devise)
+
         # Ajouter la devise à la base de données
         devise = Devise(
             nom=base_code,
