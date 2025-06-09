@@ -1,7 +1,7 @@
 import os
 import requests
 from datetime import datetime, UTC, timedelta
-from repositories.company_repository import CompanyRepository
+from repositories.company_repository import SocieteRepository
 from models.company import Societe
 from schemas.company import SocieteSchema
 
@@ -11,7 +11,7 @@ class SocieteService:
     """
 
     def __init__(self):
-        self.repo = CompanyRepository()
+        self.repo = SocieteRepository()
         self.schema = SocieteSchema()
         self.api_key = os.getenv("API_KEY_FMP")
         self.api_url = os.getenv("FMP_PROFILE_API_URL", "https://financialmodelingprep.com/stable/profile")
