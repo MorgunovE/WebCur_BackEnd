@@ -70,6 +70,22 @@ class CurrencyService:
         self.repo.creer(devise)
         return self.schema.dump(devise)
 
+    def obtenir_historique(self, nom, nb_jours):
+        """
+        Récupère l'historique des taux de change d'une devise pour les derniers nb_jours jours.
+        """
+        today = datetime.now(UTC).strftime("%Y-%m-%d")
+        dates = [(datetime.now(UTC) - timedelta(days=i)).strftime("%Y-%m-%d") for i in range(nb_jours)]
+        records = self.repo.lire_historique_par_nom(nom, dates)
+        return self.schema.dump(records, many=True)
+
+    def obtenir_historique_periode(self, nom, date_debut, date_fin):
+        """
+        Récupère l'historique des taux de change d'une devise pour une période donnée.s
+        """
+        records = self.repo.lire_historique_sur_periode(nom, date_debut, date_fin)
+        return self.schema.dump(records, many=True)
+
 
     def convertir(self, code_source, code_cible, montant):
         """
