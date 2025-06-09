@@ -103,6 +103,6 @@ class SocieteService:
         results = []
         for symbole in popular:
             res = self.obtenir_societe(symbole)
-            if isinstance(res, dict) and "symbol" in res:
+            if isinstance(res, dict) and "symbole" in res:
                 results.append(res)
         return results
