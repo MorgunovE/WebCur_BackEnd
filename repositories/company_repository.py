@@ -32,7 +32,7 @@ class SocieteRepository:
         societe.id = str(result.inserted_id)
         return societe
 
-    def chercher_historique(self, symbole, dates):
+    def lire_historique_par_symbole(self, symbole, dates):
         """
         Récupère l'historique d'une société pour une liste de dates.
         """
@@ -42,7 +42,7 @@ class SocieteRepository:
         })
         return [Societe.from_dict(doc) for doc in cursor]
 
-    def chercher_historique_periode(self, symbole, date_debut, date_fin):
+    def lire_historique_sur_periode(self, symbole, date_debut, date_fin):
         """
         Récupère l'historique d'une société pour une période donnée (dates inclusives).
         """
