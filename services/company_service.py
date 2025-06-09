@@ -97,3 +97,12 @@ class SocieteService:
         """
         records = self.repo.lire_historique_sur_periode(symbole, date_debut, date_fin)
         return self.schema.dump(records, many=True)
+
+    def obtenir_societes_populaires(self):
+        popular = [s.strip().upper() for s in os.getenv("POPULAR_COMPANIES", "AAPL,MSFT,GOOGL,AMZN,TSLA").split(",")]
+        results = []
+        for symbole in popular:
+            res = self.obtenir_societe(symbole)
+            if isinstance(res, dict) and "symbol" in res:
+                results.append(res)
+        return results
