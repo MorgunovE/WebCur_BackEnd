@@ -16,8 +16,13 @@ API RESTful pour la gestion des utilisateurs et l'accès à des données financi
 - Endpoint pour calculer le coût d'achat d'une action avec conversion de devise (`/actions/calculer`)
 - Messages d'erreur pour les opérations sur les actions et devises
 - Historique des taux de change d'une devise sur une période donnée (`/devises/<nom>/historique`)
-- Récupère l'historique des entrées d'une action : Vous pouvez spécifier une période avec les paramètres date_debut et date_fin (format AAAA-MM-JJ), ou un nombre de jours avec jours (minimum 4).
-Au moins l'un des deux modes est requis.
+- Récupère l'historique des entrées d'une action : Vous pouvez spécifier une période avec les paramètres date_debut et date_fin (format AAAA-MM-JJ), ou un nombre de jours avec jours (minimum 4). Au moins l'un des deux modes est requis.
+- Récupération des informations détaillées d'une société cotée en bourse via son symbole (ex: AAPL).
+- Stockage des données en base MongoDB pour éviter les appels API inutiles (1 appel/jour/société).
+- Historique des sociétés sur plusieurs jours ou période personnalisée.
+- Endpoint public pour les sociétés les plus populaires.
+- Sécurité JWT pour la plupart des endpoints.
+- Tests automatisés avec Pytest.
 
 ## Technologies utilisées
 
@@ -125,7 +130,9 @@ pytest tests\test_stock.py
 | GET     | `/actions/favoris`            | Liste des actions favorites de l'utilisateur           | Oui              |
 | POST    | `/actions/favoris`            | Ajouter une action aux favoris                         | Oui              |
 | DELETE  | `/actions/favoris`            | Supprimer une action des favoris                       | Oui              |
-
+| GET     | `/societes/{symbole}`                   | Récupère les informations d'une société par son symbole            | Oui              |
+| GET     | `/societes/{symbole}/historique`         | Récupère l'historique d'une société (jours ou période)             | Oui              |
+| GET     | `/societes/populaires`                  | Récupère les informations des sociétés les plus populaires         | Non       |
 ---
 
 ## Détail des endpoints devises
