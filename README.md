@@ -90,6 +90,11 @@ Le fichier OpenAPI est en `static/swagger.json`.
 ```sh
 pytest
 ```
+ou si vous voulez exécuter uniquement les tests de `test_stock.py` :
+```sh
+pytest tests\test_stock.py
+```
+
 
 ## Endpoints API disponibles
 
