@@ -186,6 +186,43 @@
         }
       }
     },
+    "/devises/{nom}/historique": {
+      "get": {
+        "tags": ["Devise"],
+        "summary": "Obtenir l'historique des taux de change",
+        "description": "Récupère l'historique des taux de change pour une devise donnée.",
+        "parameters": [
+          {
+            "name": "nom",
+            "in": "path",
+            "required": true,
+            "description": "Currency code (e.g. USD, EUR)",
+            "schema": { "type": "string", "example": "CAD" }
+          },
+          {
+            "name": "jours",
+            "in": "query",
+            "required": false,
+            "description": "Nombre de jours pour l'historique",
+            "schema": { "type": "integer", "example": 2 }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "L'historique des taux de change",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Devise" }
+                }
+              }
+            }
+          },
+          "404": { "description": "Devise non trouvée" }
+        }
+      }
+    },
      "/devises/{nom}": {
       "get": {
         "tags": ["Devise"],
