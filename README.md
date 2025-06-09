@@ -16,6 +16,8 @@ API RESTful pour la gestion des utilisateurs et l'accès à des données financi
 - Endpoint pour calculer le coût d'achat d'une action avec conversion de devise (`/actions/calculer`)
 - Messages d'erreur pour les opérations sur les actions et devises
 - Historique des taux de change d'une devise sur une période donnée (`/devises/<nom>/historique`)
+- Récupère l'historique des entrées d'une action : Vous pouvez spécifier une période avec les paramètres date_debut et date_fin (format AAAA-MM-JJ), ou un nombre de jours avec jours (minimum 4).
+Au moins l'un des deux modes est requis.
 
 ## Technologies utilisées
 
@@ -118,6 +120,8 @@ pytest tests\test_stock.py
 | GET     | `/health`                     | Vérifie l'état de santé de l'API                                                            | Non              |
 | GET     | `/swagger`                    | Accès à la documentation interactive Swagger                                                | Non              |
 | POST    | `/actions/calculer`           | Calculer le coût d'achat d'une action                  | Oui              |
+| GET     | `/actions/favoris`            | Liste des actions favorites de l'utilisateur           | Oui              |
+| GET | `/actions/{symbole}/historique`| Récupère l'historique d'une action sur une période ou un nombre de jours (jours ≥ 4, ou date_debut/date_fin) | Non |
 | GET     | `/actions/favoris`            | Liste des actions favorites de l'utilisateur           | Oui              |
 | POST    | `/actions/favoris`            | Ajouter une action aux favoris                         | Oui              |
 | DELETE  | `/actions/favoris`            | Supprimer une action des favoris                       | Oui              |
