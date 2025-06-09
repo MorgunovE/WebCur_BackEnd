@@ -9,7 +9,11 @@ from resources.user_resource import UtilisateurListRessource, UtilisateurRessour
 from resources.auth_resource import AuthentificationRessource
 from resources.auth_resource import DeconnexionRessource
 from resources.currency_resource import (
-    DeviseRessource, ConversionRessource, FavorisRessource, PopulairesRessource
+    DeviseRessource,
+    ConversionRessource,
+    FavorisRessource,
+    PopulairesRessource,
+    DeviseHistoriqueRessource
 )
 from resources.stock_resource import (
     ActionRessource,
@@ -51,6 +55,7 @@ api.add_resource(DeviseRessource, '/devises/<string:nom>')
 api.add_resource(ConversionRessource, '/devises/conversion')
 api.add_resource(FavorisRessource, '/devises/favoris')
 api.add_resource(PopulairesRessource, '/devises/populaires')
+api.add_resource(DeviseHistoriqueRessource, '/devises/<string:nom>/historique')
 
 # Enregistrer les ressources d'action
 api.add_resource(ActionRessource, '/actions/<string:symbole>')
