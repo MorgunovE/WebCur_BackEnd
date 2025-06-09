@@ -43,6 +43,26 @@ class StockRepository:
         )
         return [doc["date"] for doc in cursor]
 
+    def lire_historique_sur_periode(self, symbole, date_debut, date_fin):
+        """
+        Retrieve the history of a stock for a given period (inclusive dates).
+        """
+        cursor = self.collection.find({
+            "symbole": symbole,
+            "date": {"$gte": date_debut, "$lte": date_fin}
+        }).sort("date", 1)
+        return [Action.from_dict(doc) for doc in cursor]
+
+    def lire_historique_par_jours(self, symbole, dates):
+        """
+        Retrieve the history of a stock for a list of dates.
+        """
+        cursor = self.collection.find({
+            "symbole": symbole,
+            "date": {"$in": dates}
+        }).sort("date", 1)
+        return [Action.from_dict(doc) for doc in cursor]
+
     def get_all_dates_for_symbol(self, symbole):
         cursor = self.collection.find({"symbole": symbole}, {"date": 1, "_id": 0})
         return [doc["date"] for doc in cursor]
