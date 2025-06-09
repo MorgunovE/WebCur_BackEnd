@@ -23,6 +23,12 @@ from resources.stock_resource import (
     ActionHistoriqueRessource
 )
 
+from resources.company_resource import (
+    SocieteRessource,
+    SocieteHistoriqueRessource,
+    SocietesPopulairesRessource
+)
+
 
 import os
 
@@ -64,6 +70,11 @@ api.add_resource(CalculerAchatRessource, '/actions/calculer')
 api.add_resource(PopulairesActionsRessource, '/actions/populaires')
 api.add_resource(FavorisActionsRessource, '/actions/favoris')
 api.add_resource(ActionHistoriqueRessource, '/actions/<string:symbole>/historique')
+
+# Enregistrer les ressources de société
+api.add_resource(SocieteRessource, '/societes/<string:symbole>')
+api.add_resource(SocieteHistoriqueRessource, '/societes/<string:symbole>/historique')
+api.add_resource(SocietesPopulairesRessource, '/societes/populaires')
 
 # Configurer Swagger UI
 SWAGGER_URL = app.config['SWAGGER_URL']
