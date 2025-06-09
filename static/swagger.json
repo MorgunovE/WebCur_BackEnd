@@ -189,27 +189,41 @@
     "/devises/{nom}/historique": {
       "get": {
         "tags": ["Devise"],
-        "summary": "Obtenir l'historique des taux de change",
-        "description": "Récupère l'historique des taux de change pour une devise donnée.",
+        "summary": "Obtenir l'historique d'une devise",
+        "description": "Récupère l'historique des taux de change d'une devise. Vous pouvez spécifier une période avec les paramètres `date_debut` et `date_fin` (format AAAA-MM-JJ), ou un nombre de jours avec `jours` (minimum 1). Au moins l'un des deux modes est requis.",
         "parameters": [
           {
             "name": "nom",
             "in": "path",
             "required": true,
-            "description": "Currency code (e.g. USD, EUR)",
+            "description": "Code de la devise (ex: USD, EUR)",
             "schema": { "type": "string", "example": "CAD" }
           },
           {
             "name": "jours",
             "in": "query",
             "required": false,
-            "description": "Nombre de jours pour l'historique",
-            "schema": { "type": "integer", "example": 2 }
+            "description": "Nombre de jours pour l'historique (minimum 1)",
+            "schema": { "type": "integer", "minimum": 1, "example": 2 }
+          },
+          {
+            "name": "date_debut",
+            "in": "query",
+            "required": false,
+            "description": "Date de début (format AAAA-MM-JJ)",
+            "schema": { "type": "string", "format": "date" }
+          },
+          {
+            "name": "date_fin",
+            "in": "query",
+            "required": false,
+            "description": "Date de fin (format AAAA-MM-JJ)",
+            "schema": { "type": "string", "format": "date" }
           }
         ],
         "responses": {
           "200": {
-            "description": "L'historique des taux de change",
+            "description": "Historique de la devise",
             "content": {
               "application/json": {
                 "schema": {
@@ -219,6 +233,7 @@
               }
             }
           },
+          "400": { "description": "Paramètres manquants ou invalides" },
           "404": { "description": "Devise non trouvée" }
         }
       }
