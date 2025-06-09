@@ -1,22 +1,19 @@
 from marshmallow import Schema, fields, validate
 
 class SocieteSchema(Schema):
-    """
-    Schéma de sérialisation et de validation pour le modèle Société (informations sur la société).
-    """
-    id = fields.Str(dump_only=True)  # ID MongoDB
-    symbol = fields.Str(required=True, validate=validate.Length(min=1, max=10))  # Symbole de l'action, ex: "AAPL"
-    date = fields.Str(required=True)  # Date de mise à jour, ex: "2025-06-08"
-    price = fields.Float()  # Prix actuel de l'action
-    marketCap = fields.Float()  # Capitalisation boursière
+    id = fields.Str(dump_only=True)
+    symbole = fields.Str(required=True, validate=validate.Length(min=1, max=10))  # <-- was symbol
+    date_maj = fields.Str(required=True)  # <-- was date
+    price = fields.Float()
+    marketCap = fields.Float()
     beta = fields.Float()
     lastDividend = fields.Float()
-    range = fields.Str()  # Plage de prix sur la période
+    range = fields.Str()
     change = fields.Float()
     changePercentage = fields.Float()
     volume = fields.Int()
     averageVolume = fields.Int()
-    companyName = fields.Str()  # Nom complet de la société
+    companyName = fields.Str()
     currency = fields.Str(validate=validate.Length(equal=3))
     cik = fields.Str()
     isin = fields.Str()
