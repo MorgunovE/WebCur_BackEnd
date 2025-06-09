@@ -19,9 +19,115 @@
     },
     { "name": "Action",
       "description": "Opérations sur les actions boursières"
+    },
+    { "name": "Sociétés",
+      "description": "Opérations sur les sociétés"
     }
   ],
   "paths": {
+    "/societes/{symbole}": {
+      "get": {
+        "tags": ["Sociétés"],
+        "summary": "Récupère les informations d'une société par son symbole",
+        "description": "Retourne les informations détaillées d'une société cotée en bourse pour aujourd'hui. JWT requis.",
+        "parameters": [
+          {
+            "name": "symbole",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" },
+            "description": "Symbole de l'action (ex: AAPL)"
+          }
+        ],
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Informations de la société",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Societe" }
+              }
+            }
+          },
+          "404": {
+            "description": "Société non trouvée"
+          }
+        }
+      }
+    },
+    "/societes/{symbole}/historique": {
+      "get": {
+        "tags": ["Sociétés"],
+        "summary": "Récupère l'historique d'une société",
+        "description": "Retourne l'historique des informations d'une société par nombre de jours ou période. JWT requis.",
+        "parameters": [
+          {
+            "name": "symbole",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" },
+            "description": "Symbole de l'action (ex: AAPL)"
+          },
+          {
+            "name": "jours",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "integer", "minimum": 2 },
+            "description": "Nombre de jours d'historique (min 2)"
+          },
+          {
+            "name": "date_debut",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "string", "format": "date" },
+            "description": "Date de début (AAAA-MM-JJ)"
+          },
+          {
+            "name": "date_fin",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "string", "format": "date" },
+            "description": "Date de fin (AAAA-MM-JJ)"
+          }
+        ],
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Historique de la société",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Societe" }
+                }
+              }
+            }
+          },
+          "400": { "description": "Paramètres manquants ou invalides" },
+          "404": { "description": "Aucune donnée disponible pour cette période" }
+        }
+      }
+    },
+    "/societes/populaires": {
+      "get": {
+        "tags": ["Sociétés"],
+        "summary": "Récupère les sociétés les plus populaires",
+        "description": "Retourne les informations des sociétés les plus populaires (5 par défaut). Pas d'authentification requise.",
+        "responses": {
+          "200": {
+            "description": "Liste des sociétés populaires",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Societe" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/actions/{symbole}": {
       "get": {
         "tags": ["Action"],
@@ -663,6 +769,49 @@
       }
     },
     "schemas": {
+      "Societe": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "symbole": { "type": "string", "example": "AAPL" },
+          "date_maj": { "type": "string", "format": "date" },
+          "companyName": { "type": "string" },
+          "price": { "type": "number" },
+          "marketCap": { "type": "number" },
+          "beta": { "type": "number" },
+          "lastDividend": { "type": "number" },
+          "range": { "type": "string" },
+          "change": { "type": "number" },
+          "changePercentage": { "type": "number" },
+          "volume": { "type": "integer" },
+          "averageVolume": { "type": "integer" },
+          "currency": { "type": "string" },
+          "cik": { "type": "string" },
+          "isin": { "type": "string" },
+          "cusip": { "type": "string" },
+          "exchangeFullName": { "type": "string" },
+          "exchange": { "type": "string" },
+          "industry": { "type": "string" },
+          "website": { "type": "string" },
+          "description": { "type": "string" },
+          "ceo": { "type": "string" },
+          "sector": { "type": "string" },
+          "country": { "type": "string" },
+          "fullTimeEmployees": { "type": "string" },
+          "phone": { "type": "string" },
+          "address": { "type": "string" },
+          "city": { "type": "string" },
+          "state": { "type": "string" },
+          "zip": { "type": "string" },
+          "image": { "type": "string" },
+          "ipoDate": { "type": "string" },
+          "defaultImage": { "type": "boolean" },
+          "isEtf": { "type": "boolean" },
+          "isActivelyTrading": { "type": "boolean" },
+          "isAdr": { "type": "boolean" },
+          "isFund": { "type": "boolean" }
+        }
+      },
       "Action": {
         "type": "object",
         "properties": {
