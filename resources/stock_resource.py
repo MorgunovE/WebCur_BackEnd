@@ -74,3 +74,23 @@ class FavorisActionsRessource(Resource):
         if not symbole:
             return {"message": "Symbole requis."}, 400
         return self.service.supprimer_favori(user_id, symbole.upper()), 200
+
+class ActionHistoriqueRessource(Resource):
+    def __init__(self):
+        self.service = StockService()
+
+    def get(self, symbole):
+        nb_jours = request.args.get("jours", type=int)
+        date_debut = request.args.get("date_debut")
+        date_fin = request.args.get("date_fin")
+        if nb_jours:
+            if nb_jours < 1:
+                return {"message": "Le nombre de jours doit être au moins 1."}, 400
+            result = self.service.obtenir_historique(symbole.upper(), nb_jours)
+        elif date_debut and date_fin:
+            result = self.service.obtenir_historique_periode(symbole.upper(), date_debut, date_fin)
+        else:
+            return {"message": "Paramètres manquants ou invalides."}, 400
+        if not result:
+            return {"message": "Aucune donnée disponible pour cette période."}, 404
+        return result, 200
