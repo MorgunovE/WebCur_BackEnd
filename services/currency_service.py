@@ -1,6 +1,6 @@
 import os
 import requests
-from datetime import datetime, UTC
+from datetime import datetime, UTC, timedelta
 from repositories.currency_repository import CurrencyRepository
 from models.currency import Devise
 from schemas.currency import DeviseSchema
@@ -81,7 +81,7 @@ class CurrencyService:
 
     def obtenir_historique_periode(self, nom, date_debut, date_fin):
         """
-        Récupère l'historique des taux de change d'une devise pour une période donnée.s
+        Récupère l'historique des taux de change d'une devise pour une période donnée
         """
         records = self.repo.lire_historique_sur_periode(nom, date_debut, date_fin)
         return self.schema.dump(records, many=True)
