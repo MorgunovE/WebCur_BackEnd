@@ -72,3 +72,27 @@ class PopulairesRessource(Resource):
             if isinstance(result, dict) and "nom" in result:
                 results.append(result)
         return results, 200
+
+class DeviseHistoriqueRessource(Resource):
+    def __init__(self):
+        self.service = CurrencyService()
+
+    def get(self, nom):
+        jours = request.args.get("jours")
+        date_debut = request.args.get("date_debut")
+        date_fin = request.args.get("date_fin")
+
+        if jours:
+            try:
+                jours = int(jours)
+            except ValueError:
+                return {"message": "Paramètre 'jours' invalide."}, 400
+            historique = self.service.obtenir_historique(nom.upper(), jours)
+        elif date_debut and date_fin:
+            historique = self.service.obtenir_historique_periode(nom.upper(), date_debut, date_fin)
+        else:
+            return {"message": "Paramètres requis: 'jours' ou 'date_debut' et 'date_fin'."}, 400
+
+        if not historique:
+            return {"message": "Aucune donnée disponible pour cette période."}, 404
+        return historique, 200
