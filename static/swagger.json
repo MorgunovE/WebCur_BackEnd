@@ -55,7 +55,7 @@
     },
     "/actions/{symbole}/historique": {
       "get": {
-        "tags": ["Actions"],
+        "tags": ["Action"],
         "summary": "Obtenir l'historique d'une action",
         "description": "Récupère l'historique des entrées d'une action. Vous pouvez spécifier une période avec les paramètres `date_debut` et `date_fin` (format AAAA-MM-JJ), ou un nombre de jours avec `jours` (minimum 4). Au moins l'un des deux modes est requis.",
         "parameters": [
