@@ -19,7 +19,8 @@ from resources.stock_resource import (
     ActionRessource,
     CalculerAchatRessource,
     PopulairesActionsRessource,
-    FavorisActionsRessource
+    FavorisActionsRessource,
+    ActionHistoriqueRessource
 )
 
 
@@ -62,6 +63,7 @@ api.add_resource(ActionRessource, '/actions/<string:symbole>')
 api.add_resource(CalculerAchatRessource, '/actions/calculer')
 api.add_resource(PopulairesActionsRessource, '/actions/populaires')
 api.add_resource(FavorisActionsRessource, '/actions/favoris')
+api.add_resource(ActionHistoriqueRessource, '/actions/<string:symbole>/historique')
 
 # Configurer Swagger UI
 SWAGGER_URL = app.config['SWAGGER_URL']
