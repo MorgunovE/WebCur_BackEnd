@@ -1,6 +1,6 @@
 import os
 import requests
-from datetime import datetime, UTC
+from datetime import datetime, timedelta, UTC
 from repositories.stock_repository import StockRepository
 from models.stock import Action
 from schemas.stock import ActionSchema
@@ -103,6 +103,16 @@ class StockService:
                 volume=int(day_data["5. volume"])
             ))
         return {"series": series}
+
+    def obtenir_historique(self, symbole, nb_jours):
+        today = datetime.now(UTC).strftime("%Y-%m-%d")
+        dates = [(datetime.now(UTC) - timedelta(days=i)).strftime("%Y-%m-%d") for i in range(nb_jours)]
+        records = self.repo.lire_historique_par_jours(symbole, dates)
+        return self.schema.dump(records, many=True)
+
+    def obtenir_historique_periode(self, symbole, date_debut, date_fin):
+        records = self.repo.lire_historique_sur_periode(symbole, date_debut, date_fin)
+        return self.schema.dump(records, many=True)
 
     def calculer_cout_achat(self, symbole, date, quantite, code_devise):
         """
