@@ -15,6 +15,7 @@ API RESTful pour la gestion des utilisateurs et l'accès à des données financi
 - Gestion des actions favorites pour les utilisateurs (endpoints `/actions/favoris`)
 - Endpoint pour calculer le coût d'achat d'une action avec conversion de devise (`/actions/calculer`)
 - Messages d'erreur pour les opérations sur les actions et devises
+- Historique des taux de change d'une devise sur une période donnée (`/devises/<nom>/historique`)
 
 ## Technologies utilisées
 
@@ -107,12 +108,14 @@ pytest
 | POST    | `/devises/favoris`            | Ajoute une devise aux favoris                                                               | Oui              |
 | DELETE  | `/devises/favoris`            | Supprime une devise des favoris                                                             | Oui              |
 | GET     | `/devises/populaires`         | Retourne la liste des devises populaires (toujours à jour, API si besoin)                   | Non              |
+| GET     | `/devises/{nom}/historique`   | Récupère l'historique des taux de change d'une devise sur une période ou un nombre de jours | Non              |
 | GET     | `/health`                     | Vérifie l'état de santé de l'API                                                            | Non              |
 | GET     | `/swagger`                    | Accès à la documentation interactive Swagger                                                | Non              |
 | POST    | `/actions/calculer`           | Calculer le coût d'achat d'une action                  | Oui              |
 | GET     | `/actions/favoris`            | Liste des actions favorites de l'utilisateur           | Oui              |
 | POST    | `/actions/favoris`            | Ajouter une action aux favoris                         | Oui              |
 | DELETE  | `/actions/favoris`            | Supprimer une action des favoris                       | Oui              |
+
 ---
 
 ## Détail des endpoints devises
