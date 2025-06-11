@@ -2,12 +2,12 @@
 
 API RESTful pour la gestion des utilisateurs et l'accès à des données financières, développée avec Flask, MongoDB et JWT. Documentation interactive via Swagger UI.
 
-## 📦 Ce projet sur GitHub
+## Ce projet sur GitHub
 
 Vous pouvez retrouver ce projet sur GitHub à l'adresse suivante :  
 [https://github.com/MorgunovE/WebCur_BackEnd](https://github.com/MorgunovE/WebCur_BackEnd)
 
-## 🚀 Intégration continue avec GitHub Actions
+## Intégration continue avec GitHub Actions
 
 Ce projet utilise un pipeline GitHub Actions qui exécute automatiquement les tests à chaque nouvelle release.  
 Le workflow configure l'environnement, installe les dépendances, crée le fichier `.env` à partir d'un secret GitHub, lance un service MongoDB et exécute les tests avec `pytest`.
