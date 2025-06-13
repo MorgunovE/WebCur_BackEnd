@@ -37,13 +37,21 @@ class PopulairesActionsRessource(Resource):
         self.service = StockService()
 
     def get(self):
-        # Returner les actions populaires
         popular = [s.strip().upper() for s in os.getenv("POPULAR_STOCKS", "AAPL,MSFT,GOOGL,AMZN,TSLA").split(",")]
         results = []
         for symbole in popular:
             res = self.service.obtenir_action(symbole)
+            # Si la réponse est un dictionnaire avec le symbole, on l'ajoute à la liste des résultats
             if isinstance(res, dict) and "symbole" in res:
                 results.append(res)
+            elif isinstance(res, tuple) and res[1] == 404:
+                # Tentative de récupérer l'action depuis l'API si elle n'est pas trouvée
+                latest_dates = self.service.repo.get_all_dates_for_symbol(symbole)
+                if latest_dates:
+                    latest_date = sorted(latest_dates, reverse=True)[0]
+                    action = self.service.repo.chercher_par_symbole_et_date(symbole, latest_date)
+                    if action:
+                        results.append(self.service.schema.dump(action))
         return results, 200
 
 class FavorisActionsRessource(Resource):
