@@ -29,7 +29,14 @@ class StockService:
             if action:
                 return self.schema.dump(action)
             api_data = self._fetch_action_from_api(symbole)
-            if not api_data or "series" not in api_data:
+            if not api_data or "series" not in api_data or "Information" in getattr(api_data, "keys", lambda: [])():
+                # Si l'API ne retourne pas de données, on essaie de récupérer la dernière date disponible
+                latest_dates = self.repo.get_all_dates_for_symbol(symbole)
+                if latest_dates:
+                    latest_date = sorted(latest_dates, reverse=True)[0]
+                    action = self.repo.chercher_par_symbole_et_date(symbole, latest_date)
+                    if action:
+                        return self.schema.dump(action)
                 return {"message": "Données d'action non disponibles."}, 404
             # Vérifier les dates existantes dans la base de données
             all_dates = [a.date for a in api_data["series"]]
