@@ -49,6 +49,14 @@ api = Api(app)
 jwt = JWTManager(app)
 CORS(app)
 
+@jwt.unauthorized_loader
+def unauthorized_callback(reason):
+    return jsonify({"message": "Missing or invalid JWT"}), 401
+
+@jwt.invalid_token_loader
+def invalid_token_callback(reason):
+    return jsonify({"message": "Invalid JWT"}), 401
+
 # Enregistrer les ressources utilisateur
 api.add_resource(UtilisateurListRessource, '/utilisateurs')
 api.add_resource(UtilisateurRessource, '/utilisateurs/<string:id>')
