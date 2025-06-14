@@ -1,5 +1,6 @@
 # app.py
 from flask import Flask, jsonify
+from flask_jwt_extended.exceptions import NoAuthorizationError
 from flask_restful import Api
 from flask_jwt_extended import JWTManager
 from flask_cors import CORS
@@ -56,6 +57,10 @@ def unauthorized_callback(reason):
 @jwt.invalid_token_loader
 def invalid_token_callback(reason):
     return jsonify({"message": "Invalid JWT"}), 401
+
+@app.errorhandler(NoAuthorizationError)
+def handle_no_auth_error(e):
+    return jsonify({"msg": "Missing or invalid Authorization header"}), 401
 
 # Enregistrer les ressources utilisateur
 api.add_resource(UtilisateurListRessource, '/utilisateurs')
