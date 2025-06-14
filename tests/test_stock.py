@@ -2,6 +2,7 @@ import pytest
 import os
 import sys
 import logging
+from datetime import datetime
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from logging_config import setup_logging
@@ -42,7 +43,8 @@ def get_jwt_token(client):
 
 def test_get_stock(client):
     try:
-        response = client.get('/actions/AAPL')
+        today = datetime.now().strftime("%Y-%m-%d")
+        response = client.get(f'/actions/AAPL?date={today}')
         assert response.status_code == 200
         data = response.get_json()
         assert data["symbole"] == "AAPL"
