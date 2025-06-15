@@ -89,7 +89,6 @@
             "description": "Date de fin (AAAA-MM-JJ)"
           }
         ],
-        "security": [{ "bearerAuth": [] }],
         "responses": {
           "200": {
             "description": "Historique de la société",

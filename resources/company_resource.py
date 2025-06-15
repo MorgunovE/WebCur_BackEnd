@@ -18,7 +18,6 @@ class SocieteRessource(Resource):
         return result, 200 if isinstance(result, dict) and "message" not in result else result[1]
 
 class SocieteHistoriqueRessource(Resource):
-    method_decorators = [jwt_required()]
 
     def __init__(self):
         self.service = SocieteService()
