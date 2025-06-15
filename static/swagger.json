@@ -39,7 +39,6 @@
             "description": "Symbole de l'action (ex: AAPL)"
           }
         ],
-        "security": [{ "bearerAuth": [] }],
         "responses": {
           "200": {
             "description": "Informations de la société",

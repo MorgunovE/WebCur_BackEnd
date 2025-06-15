@@ -5,7 +5,6 @@ from services.company_service import SocieteService
 import os
 
 class SocieteRessource(Resource):
-    method_decorators = [jwt_required()]
 
     def __init__(self):
         self.service = SocieteService()
