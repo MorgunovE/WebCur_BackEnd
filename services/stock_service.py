@@ -125,7 +125,18 @@ class StockService:
         """
         Calcule le coût d'achat d'une action pour un symbole donné, à une date spécifique.
         """
-        action = self.repo.chercher_par_symbole_et_date(symbole, date)
+        if not isinstance(quantite, (int, float)):
+            return {"message": "La quantité doit être un nombre valide."}, 400
+        if quantite <= 0:
+            return {"message": "La quantité doit être positive."}, 400
+        try:
+            # Tente de parser la date pour vérifier si elle est valide
+            # Ceci vérifiera aussi si la date a un format ISO 8601 (AAAA-MM-JJ)
+            datetime.strptime(date, "%Y-%m-%d")
+        except ValueError:
+            return {"message": "Format de date invalide. Utilisez AAAA-MM-JJ."}, 400
+        
+        action = self.repo.chercher_par_symbole_et_date(symbole, date)             
         if not action:
             # Essayer de récupérer et sauvegarder depuis l'API
             self.obtenir_action(symbole, date)

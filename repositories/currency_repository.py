@@ -101,3 +101,17 @@ class CurrencyRepository:
         """
         doc = self.favoris_collection.find_one({"user_id": user_id})
         return doc["devises"] if doc and "devises" in doc else []
+    
+    def clear_devises_collection(self):
+        """
+        Supprime tous les documents de la collection 'devises'.
+        Utilisé pour nettoyer le cache des devises pour les tests.
+        """
+        self.collection.delete_many({})
+
+    def clear_favoris_collection(self):
+        """
+        Supprime tous les documents de la collection 'favoris_devises'.
+        Utilisé pour nettoyer les favoris des utilisateurs pour les tests.
+        """
+        self.favoris_collection.delete_many({})
