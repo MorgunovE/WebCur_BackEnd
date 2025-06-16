@@ -6,7 +6,6 @@ import os
 from datetime import datetime
 
 class SocieteRessource(Resource):
-    method_decorators = [jwt_required()]
 
     def __init__(self):
         self.service = SocieteService()
@@ -26,7 +25,6 @@ class SocieteRessource(Resource):
         return result, 200
 
 class SocieteHistoriqueRessource(Resource):
-    method_decorators = [jwt_required()]
 
     def __init__(self):
         self.service = SocieteService()
