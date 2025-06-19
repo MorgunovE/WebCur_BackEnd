@@ -3,7 +3,6 @@ from flask_restful import Resource
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from services.stock_service import StockService
 import os
-from datetime import datetime
 
 class ActionRessource(Resource):
     def __init__(self):
@@ -88,29 +87,18 @@ class ActionHistoriqueRessource(Resource):
     def __init__(self):
         self.service = StockService()
 
-    @jwt_required()
     def get(self, symbole):
-        nb_jours = request.args.get("jours", type=int) 
-        date_debut_str = request.args.get("date_debut")
-        date_fin_str = request.args.get("date_fin")
+        nb_jours = request.args.get("jours", type=int)
+        date_debut = request.args.get("date_debut")
+        date_fin = request.args.get("date_fin")
         if nb_jours:
             if nb_jours < 4:
                 return {"message": "Le nombre de jours doit être au moins 4."}, 400
             result = self.service.obtenir_historique(symbole.upper(), nb_jours)
-        elif date_debut_str and date_fin_str:
-            try:
-                date_debut = datetime.strptime(date_debut_str, '%Y-%m-%d')
-                date_fin = datetime.strptime(date_fin_str, '%Y-%m-%d')
-            except ValueError:
-                return {"message": "Format de date invalide. Utilisez AAAA-MM-JJ."}, 400
-
-            if date_debut > date_fin:
-                return {"message": "La date de début ne peut pas être postérieure à la date de fin."}, 400
-
-            result = self.service.obtenir_historique_periode(symbole.upper(), date_debut_str, date_fin_str)
+        elif date_debut and date_fin:
+            result = self.service.obtenir_historique_periode(symbole.upper(), date_debut, date_fin)
         else:
             return {"message": "Paramètres manquants ou invalides."}, 400
-
         if not result:
             return {"message": "Aucune donnée disponible pour cette période."}, 404
         return result, 200
