@@ -2,6 +2,7 @@ import pytest
 import os
 import sys
 import logging
+import uuid
 
 # Ajouter le chemin du répertoire racine du projet à sys.path pour les importations
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
@@ -29,31 +30,37 @@ def client():
     with app.test_client() as client:
         yield client
 
-@pytest.fixture(autouse=True)
+@pytest.fixture
 def cleanup_users():
     """
-    Fixture Pytest pour nettoyer les utilisateurs créés après chaque test.
+    Fixture Pytest pour nettoyer les utilisateurs créés par ce test.
     """
     repo = UserRepository()
-    yield
-    # Assurez-vous de nettoyer l'utilisateur créé par get_jwt_token
-    test_emails = ["currencyerrortest@mail.com"]
-    for email in test_emails:
-        repo.supprimer_par_email(email)
+    users_created_in_this_test_run = [] 
+    yield users_created_in_this_test_run 
+    
+    for email in users_created_in_this_test_run:
+        try:
+            repo.supprimer_par_email(email)
+            logging.info(f"Utilisateur de test '{email}' nettoyé.")
+        except Exception as e:
+            logging.error(f"Erreur lors du nettoyage de l'utilisateur '{email}': {e}")
 
-def get_jwt_token(client, email="currencyerrortest@mail.com", password="errpass"):
-    """
-    Helper pour obtenir un jeton JWT en enregistrant и connectant un utilisateur.
-    """
-    repo = UserRepository()
-    repo.supprimer_par_email(email) # Nettoyer avant de créer pour un état propre
+
+def get_jwt_token(client, users_to_cleanup_list):
+    unique_email = f"currency_error_test_user_{uuid.uuid4()}@mail.com" 
+    password = "errpass"
+    
+    users_to_cleanup_list.append(unique_email)
+
     client.post('/utilisateurs', json={
-        "email": email,
+        "email": unique_email,
         "mot_de_passe": password,
         "nom_utilisateur": "CurrencyErrorTest"
     })
+    
     resp = client.post('/connexion', json={
-        "email": email,
+        "email": unique_email,
         "mot_de_passe": password
     })
     return resp.get_json()["access_token"]
@@ -131,7 +138,7 @@ def test_get_currency_non_existent_code(client):
         raise
 
 # --- Tests pour POST /devises/conversion ---
-def test_convert_currency_missing_source_code(client):
+def test_convert_currency_missing_source_code(client, cleanup_users):
     """
     Scénario: Tenter une conversion avec un code source manquant dans la requête.
     Attendu: 400 Bad Request.
@@ -139,7 +146,7 @@ def test_convert_currency_missing_source_code(client):
     test_name = "test_convert_currency_missing_source_code"
     logging.info(f"Test: {test_name} - Tenter une conversion avec un code source manquant.")
     try:
-        token = get_jwt_token(client)
+        token = get_jwt_token(client, cleanup_users) 
         response = client.post(
             '/devises/conversion',
             json={"code_cible": "EUR", "montant": 100}, # code_source manquant
@@ -163,7 +170,7 @@ def test_convert_currency_missing_source_code(client):
         log_test_result(test_name, False)
         raise
 
-def test_convert_currency_missing_target_code(client):
+def test_convert_currency_missing_target_code(client, cleanup_users):
     """
     Scénario: Tenter une conversion avec un code cible manquant dans la requête.
     Attendu: 400 Bad Request.
@@ -171,7 +178,7 @@ def test_convert_currency_missing_target_code(client):
     test_name = "test_convert_currency_missing_target_code"
     logging.info(f"Test: {test_name} - Tenter une conversion avec un code cible manquant.")
     try:
-        token = get_jwt_token(client)
+        token = get_jwt_token(client, cleanup_users)
         response = client.post(
             '/devises/conversion',
             json={"code_source": "USD", "montant": 100}, # code_cible manquant
@@ -195,7 +202,7 @@ def test_convert_currency_missing_target_code(client):
         log_test_result(test_name, False)
         raise
 
-def test_convert_currency_invalid_amount(client):
+def test_convert_currency_invalid_amount(client, cleanup_users):
     """
     Scénario: Tenter une conversion avec un montant invalide (non-numérique или négatif).
     Attendu: 400 Bad Request.
@@ -203,7 +210,7 @@ def test_convert_currency_invalid_amount(client):
     test_name = "test_convert_currency_invalid_amount"
     logging.info(f"Test: {test_name} - Tenter une conversion avec un montant invalide.")
     try:
-        token = get_jwt_token(client)
+        token = get_jwt_token(client, cleanup_users)
         # Test 1: Montant non numérique
         response1 = client.post(
             '/devises/conversion',
@@ -244,7 +251,7 @@ def test_convert_currency_invalid_amount(client):
         log_test_result(test_name, False)
         raise
 
-def test_convert_currency_non_existent_source_or_target(client):
+def test_convert_currency_non_existent_source_or_target(client, cleanup_users):
     """
     Scénario: Tenter une conversion avec un code source ou cible inexistant.
     Attendu: 404 Not Found.
@@ -252,7 +259,7 @@ def test_convert_currency_non_existent_source_or_target(client):
     test_name = "test_convert_currency_non_existent_source_or_target"
     logging.info(f"Test: {test_name} - Tenter une conversion avec une devise source/cible inexistante.")
     try:
-        token = get_jwt_token(client)
+        token = get_jwt_token(client, cleanup_users)
         # Test 1: Code source inexistant
         response1 = client.post(
             '/devises/conversion',
