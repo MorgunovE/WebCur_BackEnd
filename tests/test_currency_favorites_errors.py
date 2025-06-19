@@ -2,6 +2,7 @@ import pytest
 import os
 import sys
 import logging
+import uuid
 
 # Ajouter le chemin du répertoire racine du projet à sys.path pour les importations
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
@@ -29,31 +30,34 @@ def client():
     with app.test_client() as client:
         yield client
 
-@pytest.fixture(autouse=True)
+@pytest.fixture
 def cleanup_users():
-    """
-    Fixture Pytest pour nettoyer les utilisateurs créés après chaque test.
-    """
     repo = UserRepository()
-    yield
-    # Assurez-vous de nettoyer l'utilisateur créé par get_jwt_token
-    test_emails = ["favoriteerrortest@mail.com"]
-    for email in test_emails:
-        repo.supprimer_par_email(email)
+    users_created_in_this_test_run = [] 
+    yield users_created_in_this_test_run 
 
-def get_jwt_token(client, email="favoriteerrortest@mail.com", password="favpass"):
-    """
-    Helper pour obtenir un jeton JWT en enregistrant et connectant un utilisateur.
-    """
-    repo = UserRepository()
-    repo.supprimer_par_email(email) # Nettoyer avant de créer pour un état propre
+    for email in users_created_in_this_test_run:
+        try:
+            repo.supprimer_par_email(email)
+            logging.info(f"Utilisateur de test '{email}' nettoyé.")
+        except Exception as e:
+           
+            logging.warning(f"Impossible de nettoyer l'utilisateur '{email}': {e}. Il se peut qu'il n'existe pas ou qu'il y ait eu une autre erreur.")
+
+def get_jwt_token(client, users_to_cleanup_list):
+    unique_email = f"favorite_test_user_{uuid.uuid4()}@mail.com"
+    password = "favpass"
+
+    users_to_cleanup_list.append(unique_email) 
+
     client.post('/utilisateurs', json={
-        "email": email,
+        "email": unique_email,
         "mot_de_passe": password,
         "nom_utilisateur": "FavoriteErrorTest"
     })
+
     resp = client.post('/connexion', json={
-        "email": email,
+        "email": unique_email,
         "mot_de_passe": password
     })
     return resp.get_json()["access_token"]
@@ -86,7 +90,7 @@ def get_error_message(data):
     return str(data)
 
 # --- Tests pour POST /devises/favoris ---
-def test_add_favorite_missing_currency_name(client):
+def test_add_favorite_missing_currency_name(client, cleanup_users):
     """
     Scénario: Tenter d'ajouter un favori sans spécifier le nom de la devise.
     Attendu: 400 Bad Request.
@@ -94,7 +98,7 @@ def test_add_favorite_missing_currency_name(client):
     test_name = "test_add_favorite_missing_currency_name"
     logging.info(f"Test: {test_name} - Tenter d'ajouter un favori sans nom de devise.")
     try:
-        token = get_jwt_token(client)
+        token = get_jwt_token(client, cleanup_users)
         response = client.post(
             '/devises/favoris',
             json={}, # nom_devise manquant
@@ -118,7 +122,7 @@ def test_add_favorite_missing_currency_name(client):
         log_test_result(test_name, False)
         raise
 
-def test_add_favorite_non_existent_currency(client):
+def test_add_favorite_non_existent_currency(client, cleanup_users):
     """
     Scénario: Tenter d'ajouter une devise inexistante aux favoris.
     Attendu: 404 Not Found (si l'API valide l'existence de la devise), ou 200 OK si l'API ne valide pas.
@@ -126,7 +130,7 @@ def test_add_favorite_non_existent_currency(client):
     test_name = "test_add_favorite_non_existent_currency"
     logging.info(f"Test: {test_name} - Tenter d'ajouter une devise inexistante aux favoris.")
     try:
-        token = get_jwt_token(client)
+        token = get_jwt_token(client, cleanup_users)
         response = client.post(
             '/devises/favoris',
             json={"nom_devise": "NONEXISTENT"}, # Devise inexistante
@@ -147,7 +151,7 @@ def test_add_favorite_non_existent_currency(client):
         log_test_result(test_name, False)
         raise
 
-def test_add_favorite_already_exists(client):
+def test_add_favorite_already_exists(client, cleanup_users):
     """
     Scénario: Tenter d'ajouter une devise déjà présente dans les favoris.
     Attendu: 200 OK ou 409 Conflict.
@@ -155,7 +159,7 @@ def test_add_favorite_already_exists(client):
     test_name = "test_add_favorite_already_exists"
     logging.info(f"Test: {test_name} - Tenter d'ajouter une devise déjà favorite.")
     try:
-        token = get_jwt_token(client)
+        token = get_jwt_token(client, cleanup_users)
         client.post(
             '/devises/favoris',
             json={"nom_devise": "USD"},
@@ -216,7 +220,7 @@ def test_add_favorite_unauthenticated(client):
         raise
 
 # --- Tests pour DELETE /devises/favoris ---
-def test_delete_favorite_missing_currency_name(client):
+def test_delete_favorite_missing_currency_name(client, cleanup_users):
     """
     Scénario: Tenter de supprimer un favori sans spécifier le nom de la devise.
     Attendu: 400 Bad Request.
@@ -224,7 +228,7 @@ def test_delete_favorite_missing_currency_name(client):
     test_name = "test_delete_favorite_missing_currency_name"
     logging.info(f"Test: {test_name} - Tenter de supprimer un favori sans nom de devise.")
     try:
-        token = get_jwt_token(client)
+        token = get_jwt_token(client, cleanup_users)
         response = client.delete(
             '/devises/favoris',
             json={}, # nom_devise manquant
@@ -248,7 +252,7 @@ def test_delete_favorite_missing_currency_name(client):
         log_test_result(test_name, False)
         raise
 
-def test_delete_favorite_non_existent_currency_from_user_favorites(client):
+def test_delete_favorite_non_existent_currency_from_user_favorites(client, cleanup_users):
     """
     Scénario: Tenter de supprimer une devise qui n'est pas dans les favoris de l'utilisateur.
     Attendu: 200 OK (comportement idempotent).
@@ -256,7 +260,7 @@ def test_delete_favorite_non_existent_currency_from_user_favorites(client):
     test_name = "test_delete_favorite_non_existent_currency_from_user_favorites"
     logging.info(f"Test: {test_name} - Tenter de supprimer une devise qui n'est pas dans les favoris de l'utilisateur.")
     try:
-        token = get_jwt_token(client)
+        token = get_jwt_token(client, cleanup_users)
         # S'assurer que l'utilisateur n'a pas EUR dans ses favoris pour ce test
         client.delete(
             '/devises/favoris',
