@@ -29,18 +29,6 @@ def cleanup_users():
     
     # Liste des emails d'utilisateurs de test à supprimer
     test_emails = [
-        "testuser@mail.com",
-        "authuser@mail.com",
-        "updateuser@mail.com",
-        "loginuser@mail.com",
-        "deleteuser@mail.com",
-        "unauthorized@mail.com",
-        "invalidtoken@mail.com",
-        "existinguser_for_nonexistent_id@mail.com",
-        "user_for_invalid_data_test@mail.com",
-        "invalid-email", 
-        "test1@mail.com", 
-        "exemple1@mail.com", 
         "delete_success_test@mail.com",
         "delete_unauth_test@mail.com",
         "temp_user_for_nonexistent_delete@mail.com"
