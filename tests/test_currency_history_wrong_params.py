@@ -3,6 +3,7 @@ import logging
 import sys
 import os
 import datetime
+import uuid
 
 # Configuration du logging
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
@@ -25,28 +26,19 @@ def client():
     with app.test_client() as client:
         yield client
 
-@pytest.fixture(autouse=True) 
-def cleanup_users():
-    """
-    Fixture pour nettoyer les utilisateurs de test créés par les tests de devise.
-    Ceci est important car les utilisateurs sont créés pour obtenir un token.
-    """
-    repo = UserRepository()
-    yield # Exécute le test
-    repo.supprimer_par_email("currencyhistorytest@mail.com")
-    repo.supprimer_par_email("currencytest@mail.com") 
-
 @pytest.fixture
-def cleanup_currency_favoris_only():
-    """
-    Fixture pour nettoyer SEULEMENT la collection 'favoris_devises' après chaque test.
-    La collection 'devises' (cache historique) n'est PAS nettoyée automatiquement ici
-    pour permettre des tests simulant le comportement du cache.
-    """
-    repo = CurrencyRepository()
-    repo.clear_favoris_collection() # Nettoie les favoris
-    yield
-    repo.clear_favoris_collection() # Nettoie les favoris après le test
+def cleanup_users():
+    repo = UserRepository()
+    users_created_in_this_test_run = []
+    yield users_created_in_this_test_run
+
+    for email in users_created_in_this_test_run:
+        try:
+            repo.supprimer_par_email(email)
+            logging.info(f"Utilisateur de test '{email}' nettoyé.")
+        except Exception as e:
+            logging.error(f"Erreur lors du nettoyage de l'utilisateur '{email}': {e}")
+
 
 # --- Fonctions utilitaires ---
 
@@ -59,32 +51,34 @@ def log_test_result(test_name, result):
     else:
         logging.error(f"{test_name}: FAILED")
 
-def get_jwt_token_for_currency_tests(client):
+def get_jwt_token_for_currency_tests(client, users_to_cleanup_list):
     """
     Fonction d'aide pour obtenir un token JWT pour les tests de devise.
     Crée un utilisateur de test spécifique pour les devises si nécessaire.
     """
-    user_email = "currencyhistorytest@mail.com"
+    unique_email = f"cur_history_test_user_{uuid.uuid4()}@mail.com"
     user_password = "currhistorypass"
     user_username = "CurrencyHistoryUser"
 
+    users_to_cleanup_list.append(unique_email) 
+
     client.post('/utilisateurs', json={
-        "email": user_email,
+        "email": unique_email, 
         "mot_de_passe": user_password,
         "nom_utilisateur": user_username
     })
     
     response = client.post('/connexion', json={
-        "email": user_email,
+        "email": unique_email, 
         "mot_de_passe": user_password
     })
     token = response.get_json().get("access_token")
-    assert token is not None, f"Échec de l'obtention du token JWT pour {user_email}."
+    assert token is not None, f"Échec de l'obtention du token JWT pour {unique_email}."
     return token
 
 # --- Tests pour GET /devises/{nom}/historique (Histoire des devises) ---
 
-def test_get_currency_history_success_jours(client):
+def test_get_currency_history_success_jours(client, cleanup_users):
     """
     Scénario: Requête réussie pour l'historique des devises avec le paramètre 'jours'.
     Le test s'attend à ce que l'API gère le cache et les appels externes.
@@ -95,7 +89,7 @@ def test_get_currency_history_success_jours(client):
     try:
         currency_name = "USD"
         jours = 7 
-        token = get_jwt_token_for_currency_tests(client)
+        token = get_jwt_token_for_currency_tests(client, cleanup_users)
 
         logging.info(f"   Envoi de la requête GET /devises/{currency_name}/historique?jours={jours}")
         response = client.get(
@@ -125,7 +119,7 @@ def test_get_currency_history_success_jours(client):
         log_test_result(test_name, False)
         raise
 
-def test_get_currency_history_success_date_range(client):
+def test_get_currency_history_success_date_range(client, cleanup_users):
     """
     Scénario: Requête réussie pour l'historique des devises avec les paramètres 'date_debut' et 'date_fin'.
     """
@@ -138,7 +132,7 @@ def test_get_currency_history_success_date_range(client):
         date_fin = (today - datetime.timedelta(days=1)).strftime("%Y-%m-%d")
         date_debut = (today - datetime.timedelta(days=7)).strftime("%Y-%m-%d")
         
-        token = get_jwt_token_for_currency_tests(client)
+        token = get_jwt_token_for_currency_tests(client, cleanup_users)
 
         logging.info(f"   Envoi de la requête GET /devises/{currency_name}/historique?date_debut={date_debut}&date_fin={date_fin}")
         response = client.get(
@@ -173,7 +167,7 @@ def test_get_currency_history_success_date_range(client):
         log_test_result(test_name, False)
         raise
 
-def test_get_currency_history_nonexistent_currency(client):
+def test_get_currency_history_nonexistent_currency(client, cleanup_users):
     """
     Scénario: Tentative de récupération de l'historique pour une devise inexistante.
     """
@@ -183,7 +177,7 @@ def test_get_currency_history_nonexistent_currency(client):
     try:
         currency_name = "XYZ" # Devise qui n'existe pas
         jours = 7
-        token = get_jwt_token_for_currency_tests(client)
+        token = get_jwt_token_for_currency_tests(client, cleanup_users)
 
         logging.info(f"   Envoi de la requête GET /devises/{currency_name}/historique?jours={jours}")
         response = client.get(
@@ -202,7 +196,7 @@ def test_get_currency_history_nonexistent_currency(client):
         log_test_result(test_name, False)
         raise
 
-def test_get_currency_history_invalid_jours_parameter(client):
+def test_get_currency_history_invalid_jours_parameter(client, cleanup_users):
     """
     Scénario: Requête avec un paramètre 'jours' invalide (inférieur au minimum, si défini dans README).
     """
@@ -212,7 +206,7 @@ def test_get_currency_history_invalid_jours_parameter(client):
     try:
         currency_name = "USD"
         jours = 3 
-        token = get_jwt_token_for_currency_tests(client)
+        token = get_jwt_token_for_currency_tests(client, cleanup_users)
 
         logging.info(f"   Envoi de la requête GET /devises/{currency_name}/historique?jours={jours}")
         response = client.get(
@@ -238,7 +232,7 @@ def test_get_currency_history_invalid_jours_parameter(client):
         log_test_result(test_name, False)
         raise
 
-def test_get_currency_history_invalid_date_parameters(client):
+def test_get_currency_history_invalid_date_parameters(client, cleanup_users):
     """
     Scénario: Requête avec des paramètres de date invalides (dates inversées ou format incorrect).
     """
@@ -247,7 +241,7 @@ def test_get_currency_history_invalid_date_parameters(client):
 
     try:
         currency_name = "USD"
-        token = get_jwt_token_for_currency_tests(client)
+        token = get_jwt_token_for_currency_tests(client, cleanup_users)
         
         # Cas 1: Dates inversées (date_debut > date_fin)
         date_debut_reversed = "2024-01-07"
