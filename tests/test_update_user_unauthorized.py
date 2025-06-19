@@ -34,11 +34,6 @@ def cleanup_users():
     repo = UserRepository()
     yield
     test_emails = [
-        "testuser@mail.com",
-        "authuser@mail.com",
-        "updateuser@mail.com",
-        "loginuser@mail.com",
-        "deleteuser@mail.com",
         "unauthorized@mail.com", 
         "invalidtoken@mail.com",
         "existinguser_for_nonexistent_id@mail.com", 
