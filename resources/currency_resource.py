@@ -9,7 +9,7 @@ class DeviseRessource(Resource):
         self.service = CurrencyService()
 
     def get(self, nom):
-        # Get details of a currency by its code
+        # Obtain currency information by name
         result = self.service.obtenir_devise(nom.upper())
         return result, 200 if isinstance(result, dict) and "message" not in result else result[1]
 
@@ -20,7 +20,7 @@ class ConversionRessource(Resource):
         self.service = CurrencyService()
 
     def post(self):
-        # Convert an amount from one currency to another
+        # Convertir une somme d'une devise à une autre
         data = request.get_json()
         code_source = data.get("code_source")
         code_cible = data.get("code_cible")
@@ -37,12 +37,12 @@ class FavorisRessource(Resource):
         self.service = CurrencyService()
 
     def get(self):
-        # Return the list of user's favorite currencies
+        # Returne le list des devises favorites de l'utilisateur
         user_id = get_jwt_identity()
         return self.service.lire_favoris(user_id), 200
 
     def post(self):
-        # Add a currency to favorites
+        # Ajouter a currency to favorites
         user_id = get_jwt_identity()
         data = request.get_json()
         nom_devise = data.get("nom_devise")
@@ -51,7 +51,7 @@ class FavorisRessource(Resource):
         return self.service.ajouter_favori(user_id, nom_devise.upper()), 200
 
     def delete(self):
-        # Remove a currency from favorites
+        # Supprimer une devise des favoris
         user_id = get_jwt_identity()
         data = request.get_json()
         nom_devise = data.get("nom_devise")
@@ -64,7 +64,7 @@ class PopulairesRessource(Resource):
         self.service = CurrencyService()
 
     def get(self):
-        # Return the most popular currencies
+        # Returne les devises les plus populaires
         popular = [c.strip().upper() for c in os.getenv("POPULAR_CURRENCIES", "USD,EUR,GBP,JPY,CAD").split(",")]
         results = []
         for code in popular:

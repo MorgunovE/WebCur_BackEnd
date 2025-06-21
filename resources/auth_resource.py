@@ -29,7 +29,7 @@ class AuthentificationRessource(Resource):
 # Ressource pour la déconnexion (JWT)
 class DeconnexionRessource(Resource):
     def post(self):
-        # Implementation de la déconnexion doit faire partie de la gestion du token JWT dnas Frontend party
+        # Implementation de la déconnexion doit faire partie de la gestion du token JWT dans Frontend party
         # En général, la déconnexion est gérée côté client en supprimant le token
         # Ici, nous pouvons juste retourner un message de succès comme exemple
         # Frontend peut supprimer le token JWT du stockage local ou des cookies

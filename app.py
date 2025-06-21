@@ -1,4 +1,3 @@
-# app.py
 from flask import Flask, jsonify
 from flask_jwt_extended.exceptions import NoAuthorizationError
 from flask_restful import Api

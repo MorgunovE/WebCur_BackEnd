@@ -6,7 +6,6 @@ def setup_logging(log_filename):
     os.makedirs(log_dir, exist_ok=True)
     log_file = os.path.join(log_dir, log_filename)
 
-    # Remove all handlers associated with the root logger
     for handler in logging.root.handlers[:]:
         logging.root.removeHandler(handler)
 

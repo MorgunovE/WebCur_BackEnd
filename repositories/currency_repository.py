@@ -1,6 +1,4 @@
-from pymongo import MongoClient, ASCENDING, DESCENDING
-from bson.objectid import ObjectId
-from typing import List
+from pymongo import MongoClient
 from models.currency import Devise
 import os
 

@@ -4,7 +4,6 @@ from datetime import datetime, UTC, timedelta
 from repositories.currency_repository import CurrencyRepository
 from models.currency import Devise
 from schemas.currency import DeviseSchema
-from marshmallow import ValidationError
 
 class CurrencyService:
     """

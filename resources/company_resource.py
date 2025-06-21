@@ -1,8 +1,6 @@
 from flask import request
 from flask_restful import Resource
-from flask_jwt_extended import jwt_required
 from services.company_service import SocieteService
-import os
 
 class SocieteRessource(Resource):
 
@@ -25,7 +23,6 @@ class SocieteHistoriqueRessource(Resource):
     def get(self, symbole):
         """
         Récupère l'historique d'une société (par nombre de jours ou période).
-        JWT requis.
         """
         nb_jours = request.args.get("jours", type=int)
         date_debut = request.args.get("date_debut")

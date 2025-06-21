@@ -3,7 +3,7 @@ from marshmallow import Schema, fields, validate
 class SocieteSchema(Schema):
     id = fields.Str(dump_only=True)
     symbole = fields.Str(required=True, validate=validate.Length(min=1, max=10))  # <-- was symbol
-    date_maj = fields.Str(required=True)  # <-- was date
+    date_maj = fields.Str(required=True)
     price = fields.Float()
     marketCap = fields.Float()
     beta = fields.Float()
