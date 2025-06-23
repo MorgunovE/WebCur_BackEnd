@@ -39,6 +39,12 @@ class UserRepository:
             {"$set": data}
         )
         return result.modified_count > 0
+    
+    def chercher_par_email(self, email):
+        user_doc = self.collection.find_one({"email": email})
+        if user_doc:
+            return Utilisateur.from_dict(user_doc)
+        return None
 
     def supprimer(self, user_id):
         result = self.collection.delete_one({"_id": ObjectId(user_id)})
