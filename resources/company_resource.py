@@ -1,6 +1,8 @@
 from flask import request
 from flask_restful import Resource
 from services.company_service import SocieteService
+import os
+from datetime import datetime
 
 class SocieteRessource(Resource):
 
@@ -50,7 +52,7 @@ class SocieteHistoriqueRessource(Resource):
 
             result = self.service.obtenir_historique_periode(symbole.upper(), date_debut, date_fin)
         else:
-            return {"message": "Paramètres manquants ou invalides. Fournissez 'jours' ou 'date_debut' и 'date_fin'."}, 400
+            return {"message": "Paramètres manquants ou invalides. Fournissez 'jours' ou 'date_debut' et 'date_fin'."}, 400
 
         if not result:
             return {"message": "Aucune donnée disponible pour cette période ou symbole introuvable."}, 404
